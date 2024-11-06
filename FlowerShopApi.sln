@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.34928.147
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlowerShopApi", "FlowerShopApi\FlowerShopApi.csproj", "{6575BDDF-DB04-42EF-9F7E-F9A057BF1E83}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLL", "BLL\BLL.csproj", "{B6A61FB4-C582-4FBE-8456-FADE580D281C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAL", "DAL\DAL.csproj", "{12DA249D-BAEE-48D7-A19C-A7EC6DAE49EC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6575BDDF-DB04-42EF-9F7E-F9A057BF1E83}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6575BDDF-DB04-42EF-9F7E-F9A057BF1E83}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6575BDDF-DB04-42EF-9F7E-F9A057BF1E83}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6575BDDF-DB04-42EF-9F7E-F9A057BF1E83}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6A61FB4-C582-4FBE-8456-FADE580D281C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6A61FB4-C582-4FBE-8456-FADE580D281C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6A61FB4-C582-4FBE-8456-FADE580D281C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6A61FB4-C582-4FBE-8456-FADE580D281C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12DA249D-BAEE-48D7-A19C-A7EC6DAE49EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12DA249D-BAEE-48D7-A19C-A7EC6DAE49EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12DA249D-BAEE-48D7-A19C-A7EC6DAE49EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12DA249D-BAEE-48D7-A19C-A7EC6DAE49EC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {34CC010F-CA63-48C8-998B-7AB52C3C06B3}
+	EndGlobalSection
+EndGlobal
