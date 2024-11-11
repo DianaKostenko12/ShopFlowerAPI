@@ -1,4 +1,5 @@
 using BLL.Services.Auth;
+using BLL.Services.Flowers;
 using DAL.Data;
 using DAL.Models;
 using DAL.Repositories.Flowers;
@@ -57,7 +58,9 @@ builder.Services
 builder.Services.AddAuthorization();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
+builder.Services.AddScoped<IFlowerRepository, FlowerRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IFlowerService, FlowerService>();
 
 var app = builder.Build();
 
