@@ -33,7 +33,7 @@ namespace FlowerShopApi.Controllers
             return Ok(flowers);
         }
 
-        [HttpGet("{flowerId}")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetFlowerById(int flowerId)
         {
             var flowerData = await _flowerService.GetFlowerByIdAsync(flowerId);
@@ -70,7 +70,7 @@ namespace FlowerShopApi.Controllers
             return Ok("Flower successfully updated.");
         }
 
-        [HttpDelete("{flowerId}")]
+        [HttpDelete]
         public async Task<IActionResult> DeleteFlower(int flowerId)
         {
             await _flowerService.DeleteFlowerAsync(flowerId);

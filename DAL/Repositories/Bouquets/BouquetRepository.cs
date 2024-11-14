@@ -1,10 +1,11 @@
 ﻿using DAL.Data;
+using DAL.Filters;
 using DAL.Models;
 using DAL.Repositories.Base;
 using DAL.Repositories.Flowers;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -40,13 +41,27 @@ namespace DAL.Repositories.Bouquets
                 .Where(b => b.User.Id == userId).ToListAsync();
         }
 
-        public async Task<List<Bouquet>> GetPostsByFilterAsync(BouquetFilterRequest request)
+        public async Task<List<Bouquet>> GetBouquetsByFilterAsync(BouquetFilterView view)
         {
-            var query = await Sourse
+            var query = Sourse
                 .Include(b => b.BouquetsFlowers)
                 .ThenInclude(bf => bf.Flower)
-                .ToListAsync();
-                
+                .AsQueryable();
+
+            if (view.MinPrice > 0 || view.MaxPrice > 0)
+            {
+                query = query.Where(b => b.BouquetsFlowers
+                    .Sum(bf => bf.Flower.FlowerCost * bf.FlowerCount) >= view.MinPrice &&
+                    b.BouquetsFlowers.Sum(bf => bf.Flower.FlowerCost * bf.FlowerCount) <= view.MaxPrice);
+            }
+
+            if (view.FlowerIds != null && view.FlowerIds.Any())
+            {
+                query = query.Where(b => b.BouquetsFlowers
+                    .Any(bf => view.FlowerIds.Contains(bf.FlowerId)));
+            }
+
+            return await query.ToListAsync();
         }
     }
 }

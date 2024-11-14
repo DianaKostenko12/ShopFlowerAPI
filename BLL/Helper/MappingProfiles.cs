@@ -13,7 +13,7 @@ namespace BLL.Helper
     {
         public MappingProfiles()
         {
-            CreateMap<CreateFlowerDescriptor, Flower>().ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(src => false)); ;
+            CreateMap<CreateFlowerDescriptor, Flower>();
             CreateMap<Flower, CreateFlowerDescriptor>();
 
             CreateMap<Flower, UpdateFlowerDescriptor>();

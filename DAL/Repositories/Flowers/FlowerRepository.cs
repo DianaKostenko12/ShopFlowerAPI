@@ -18,7 +18,7 @@ namespace DAL.Repositories.Flowers
 
         public override async Task<IEnumerable<Flower>> FindAllAsync()
         {
-            return await Sourse.Where(f => f.IsDeleted == false).OrderBy(f => f.FlowerId).ToListAsync();
+            return await Sourse.Where(f => f.IsDeleted == false).ToListAsync();
         }
 
         public override async Task RemoveAsync(Flower flower)

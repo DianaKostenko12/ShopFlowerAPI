@@ -1,24 +1,18 @@
 ﻿using AutoMapper;
-using Azure.Core;
 using BLL.Services.Flowers.Descriptors;
+using DAL.Data.UnitOfWork;
 using DAL.Models;
-using DAL.Repositories.Flowers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BLL.Services.Flowers
 {
     public class FlowerService : IFlowerService
     {
-        private readonly IFlowerRepository _flowerRepository;
         private readonly IMapper _mapper;
+        private readonly IUnitOfWork _uow;
 
-        public FlowerService(IFlowerRepository flowerRepository, IMapper mapper)
+        public FlowerService(IUnitOfWork uow, IMapper mapper)
         {
-            _flowerRepository = flowerRepository;
+            _uow = uow;
             _mapper = mapper;
         }
         public async Task AddFlowerAsync(CreateFlowerDescriptor descriptor)
@@ -28,36 +22,36 @@ namespace BLL.Services.Flowers
 
             var flowerToCreate = _mapper.Map<Flower>(descriptor);
 
-            await _flowerRepository.AddAsync(flowerToCreate);
+            await _uow.FlowerRepository.AddAsync(flowerToCreate);
 
-            await _flowerRepository.Save();
+            await _uow.FlowerRepository.Save();
         }
 
         public async Task DeleteFlowerAsync(int flowerId)
         {
-            var flowerToDelete = await _flowerRepository.FindAsync(flowerId);
+            var flowerToDelete = await _uow.FlowerRepository.FindAsync(flowerId);
             if (flowerToDelete == null)
             {
                 throw new KeyNotFoundException($"Flower with ID {flowerId} was not found.");
             }
 
-            await _flowerRepository.RemoveAsync(flowerToDelete);
-            await _flowerRepository.Save();
+            await _uow.FlowerRepository.RemoveAsync(flowerToDelete);
+            await _uow.FlowerRepository.Save();
         }
 
         public async Task<Flower> GetFlowerByIdAsync(int floweId)
         {
-            return await _flowerRepository.FindAsync(floweId);
+            return await _uow.FlowerRepository.FindAsync(floweId);
         }
 
         public async Task<IEnumerable<Flower>> GetFlowersAsync()
         {
-            return await _flowerRepository.FindAllAsync();
+            return await _uow.FlowerRepository.FindAllAsync();
         }
 
         public async Task UpdateFlowerAsync(UpdateFlowerDescriptor descriptor)
         {
-            Flower flower = await _flowerRepository.FindAsync(descriptor.FlowerId);
+            Flower flower = await _uow.FlowerRepository.FindAsync(descriptor.FlowerId);
             if (flower == null)
             {
                 throw new Exception($"Flower with ID {descriptor.FlowerId} was not found.");
@@ -67,7 +61,7 @@ namespace BLL.Services.Flowers
             flower.FlowerCost = descriptor.FlowerCost;
             flower.FlowerCount = descriptor.FlowerCount;
 
-            await _flowerRepository.Save();
+            await _uow.FlowerRepository.Save();
         }
     }
 }
