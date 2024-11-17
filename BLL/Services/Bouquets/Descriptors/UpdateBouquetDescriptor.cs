@@ -12,7 +12,6 @@ namespace BLL.Services.Bouquets.Descriptors
         public int BouquetId {get; set;}
         public string BouquetName { get; set; }
         public string BouquetDescription { get; set; }
-        public int FlowerCount { get; set; }
-        public List<int> FlowerIds { get; set; }
+        public List<FlowerQuantityDescriptor> Flowers { get; set; }
     }
 }

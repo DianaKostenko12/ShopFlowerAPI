@@ -13,5 +13,6 @@ namespace DAL.Repositories.Bouquets
     {
         Task<List<Bouquet>> GetBouquetsByUserIdAsync(int userId);
         Task<List<Bouquet>> GetBouquetsByFilterAsync(BouquetFilterView view);
+        Task<Bouquet> GetBouquetByIdAsync(int id);
     }
 }

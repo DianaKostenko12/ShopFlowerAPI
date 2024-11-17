@@ -15,5 +15,7 @@ namespace DAL.Models
         public User User { get; set; }
         public ICollection<BouquetFlower> BouquetsFlowers { get; set; }
         public ICollection<OrderBouquet> OrderBouquets { get; set; }
+
+        public float Price => BouquetsFlowers?.Sum(bf => bf.Flower.FlowerCost * bf.FlowerCount) ?? 0;
     }
 }

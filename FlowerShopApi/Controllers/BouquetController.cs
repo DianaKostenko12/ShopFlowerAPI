@@ -3,8 +3,10 @@ using BLL.Services.Bouquets;
 using BLL.Services.Bouquets.Descriptors;
 using DAL.Filters;
 using FlowerShopApi.Common.Extensions;
+using FlowerShopApi.DTOs.Bouquets;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace FlowerShopApi.Controllers
 {
@@ -13,14 +15,16 @@ namespace FlowerShopApi.Controllers
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IBouquetService _bouquetService;
+        private readonly IMapper _mapper;
 
-        public BouquetController(IBouquetService bouquetService,IHttpContextAccessor httpContextAccessor)
+        public BouquetController(IBouquetService bouquetService, IHttpContextAccessor httpContextAccessor, IMapper mapper)
         {
             _bouquetService = bouquetService;
             _httpContextAccessor = httpContextAccessor;
+            _mapper = mapper;
         }
 
-        [HttpPost, Authorize]
+        [HttpPost, Authorize(Roles = "Admin, Customer")]
         public async Task<IActionResult> AddBouquetAsync([FromBody] CreateBouquetDescriptor descriptor)
         {
             try
@@ -35,27 +39,23 @@ namespace FlowerShopApi.Controllers
             }
         }
 
-        [HttpDelete]
+        [HttpDelete, Authorize]
         public async Task<IActionResult> DeleteBouquetAsync(int bouquetId)
         {
-            try
-            {
-                await _bouquetService.DeleteBouquetAsync(bouquetId);
-                return Ok(new { Message = "Bouquet deleted successfully." });
-            }
-            catch (Exception ex)
-            {
-                return NotFound(new { Message = ex.Message });
-            }
+            int userId = _httpContextAccessor.HttpContext.User.GetUserId();
+            await _bouquetService.DeleteBouquetAsync(bouquetId, userId);
+
+            return Ok(new { Message = "Bouquet deleted successfully." });
         }
 
-        [HttpGet("{userId}")]
-        public async Task<IActionResult> GetBouquetByUserIdAsync(int userId)
+        [HttpGet("{userId}"), Authorize(Roles = "Admin, Customer")]
+        public async Task<IActionResult> GetBouquetsByUserIdAsync(int userId)
         {
             try
             {
-                var bouquets = await _bouquetService.GetBouquetByUserIdAsync(userId);
-                return Ok(bouquets);
+                var bouquets = await _bouquetService.GetBouquetsByUserIdAsync(userId);
+                var bouquetsDto = _mapper.Map<List<GetBouquetResponse>>(bouquets);
+                return Ok(bouquetsDto);
             }
             catch (Exception ex)
             {
@@ -69,7 +69,8 @@ namespace FlowerShopApi.Controllers
             try
             {
                 var bouquets = await _bouquetService.GetBouquetsByFilterAsync(view);
-                return Ok(bouquets);
+                var bouquetsDto = _mapper.Map<List<GetBouquetResponse>>(bouquets);
+                return Ok(bouquetsDto);
             }
             catch (Exception ex)
             {
@@ -77,18 +78,19 @@ namespace FlowerShopApi.Controllers
             }
         }
 
-        [HttpPut]
-        public async Task<IActionResult> UpdateBouquetAsync([FromBody] UpdateBouquetDescriptor descriptor)
-        {
-            try
-            {
-                await _bouquetService.UpdateBouquetAsync(descriptor);
-                return Ok(new { Message = "Bouquet updated successfully." });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { Message = ex.Message });
-            }
-        }
-    }
+        //[HttpGet]
+        //[HttpPut]
+        //public async Task<IActionResult> UpdateBouquetAsync([FromBody] UpdateBouquetDescriptor descriptor)
+        //{
+        //    try
+        //    {
+        //        await _bouquetService.UpdateBouquetAsync(descriptor);
+        //        return Ok(new { Message = "Bouquet updated successfully." });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest(new { Message = ex.Message });
+        //    }
+        //}
+    } 
 }

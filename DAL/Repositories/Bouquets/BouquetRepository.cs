@@ -21,12 +21,9 @@ namespace DAL.Repositories.Bouquets
 
         public override async Task<Bouquet> FindAsync(int bouquetId)
         {
-            return await Sourse.FirstOrDefaultAsync(b => b.BouquetId == bouquetId && !b.IsDeleted);
-        }
-
-        public override async Task<IEnumerable<Bouquet>> FindAllAsync()
-        {
-            return await Sourse.Where(b => b.IsDeleted == false).ToListAsync();
+            return await Sourse
+                .Include(b => b.User)
+                .FirstOrDefaultAsync(b => b.BouquetId == bouquetId && !b.IsDeleted);
         }
 
         public override async Task RemoveAsync(Bouquet bouquet)
@@ -37,15 +34,23 @@ namespace DAL.Repositories.Bouquets
         public async Task<List<Bouquet>> GetBouquetsByUserIdAsync(int userId)
         {
             return await Sourse
+                .Where(b => b.IsDeleted == false &&
+                            b.User != null &&
+                            b.User.Id == userId &&
+                            b.BouquetsFlowers.Any(bf => bf.Flower != null && bf.Flower.IsDeleted == false))
                 .Include(b => b.User)
-                .Where(b => b.User.Id == userId).ToListAsync();
+                .Include(b => b.BouquetsFlowers)
+                    .ThenInclude(bf => bf.Flower)
+                .ToListAsync();
         }
 
         public async Task<List<Bouquet>> GetBouquetsByFilterAsync(BouquetFilterView view)
         {
             var query = Sourse
+                .Where(b => b.IsDeleted == false)
                 .Include(b => b.BouquetsFlowers)
                 .ThenInclude(bf => bf.Flower)
+                .Where(f => f.IsDeleted == false)
                 .AsQueryable();
 
             if (view.MinPrice > 0 || view.MaxPrice > 0)
@@ -62,6 +67,11 @@ namespace DAL.Repositories.Bouquets
             }
 
             return await query.ToListAsync();
+        }
+
+        public async Task<Bouquet> GetBouquetByIdAsync(int id)
+        {
+           return await Sourse.Where(b => b.IsDeleted == false).FirstOrDefaultAsync(b => b.BouquetId == id);
         }
     }
 }

@@ -1,14 +1,11 @@
 ﻿using AutoMapper;
 using BLL.Services.Bouquets.Descriptors;
 using DAL.Data.UnitOfWork;
+using DAL.Exceptions;
 using DAL.Filters;
 using DAL.Models;
 using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Net;
 
 namespace BLL.Services.Bouquets
 {
@@ -56,19 +53,34 @@ namespace BLL.Services.Bouquets
             await _uow.BouquetRepository.Save();
         }
 
-        public async Task DeleteBouquetAsync(int bouquetId)
+        public async Task DeleteBouquetAsync(int bouquetId, int userId)
         {
             var bouquetToDelete = await _uow.BouquetRepository.FindAsync(bouquetId);
             if (bouquetToDelete == null)
             {
                 throw new KeyNotFoundException($"Bouquet with ID {bouquetId} was not found.");
             }
+            User recordAuthor = await _userManager.FindByIdAsync(userId.ToString());
+            IList<string> recordAuthorRoles = await _userManager.GetRolesAsync(recordAuthor);
+
+            User editor = await _userManager.FindByIdAsync(userId.ToString());
+            IList<string> editorRoles = await _userManager.GetRolesAsync(editor);
+
+            if (recordAuthorRoles.Contains(Roles.Admin) && !editorRoles.Contains(Roles.Admin))
+            {
+                throw new BusinessException(HttpStatusCode.Forbidden, "Ви не маєте права");
+            }
+
+            if (!recordAuthorRoles.Contains(Roles.Admin) && !editorRoles.Contains(Roles.Admin) && recordAuthor.Id != editor.Id)
+            {
+                throw new BusinessException(HttpStatusCode.Forbidden, "Ви не маєте права");
+            }
 
             await _uow.BouquetRepository.RemoveAsync(bouquetToDelete);
             await _uow.BouquetRepository.Save();
         }
 
-        public async Task<List<Bouquet>> GetBouquetByUserIdAsync(int userId)
+        public async Task<List<Bouquet>> GetBouquetsByUserIdAsync(int userId)
         {
             var bouquets = await _uow.BouquetRepository.GetBouquetsByUserIdAsync(userId);
             if (!bouquets.Any())
@@ -83,43 +95,58 @@ namespace BLL.Services.Bouquets
             return _uow.BouquetRepository.GetBouquetsByFilterAsync(view);
         }
 
-        public async Task UpdateBouquetAsync(UpdateBouquetDescriptor descriptor)
+        public async Task<bool> IsUserBouquetOwnerAsync(int bouquetId, int userId)
         {
-            Bouquet bouquet = await _uow.BouquetRepository.FindAsync(descriptor.BouquetId);
-            if (bouquet == null)
-            {
-                throw new Exception($"Bouquet with ID {descriptor.BouquetId} was not found.");
-            }
+            var bouquet = await _uow.BouquetRepository.GetBouquetByIdAsync(bouquetId);
 
-            bouquet.BouquetName = descriptor.BouquetName;
-            bouquet.BouquetDescription = descriptor.BouquetDescription;
-
-            if (descriptor.FlowerIds != null)
-            {
-                var existingBouquetFlowers = await _uow.BouquetFlowerRepository.GetByBouquetIdAsync(bouquet.BouquetId);
-                var existingFlowerIds = existingBouquetFlowers.Select(bf => bf.FlowerId).ToList();
-
-                var flowerIdsToRemove = existingFlowerIds.Except(descriptor.FlowerIds).ToList();
-                if (flowerIdsToRemove.Any())
-                {
-                    var flowersToRemove = existingBouquetFlowers.Where(bf => flowerIdsToRemove.Contains(bf.FlowerId)).ToList();
-                    await _uow.BouquetFlowerRepository.RemoveRangeAsync(flowersToRemove);
-                }
-
-                var flowerIdsToAdd = descriptor.FlowerIds.Except(existingFlowerIds).ToList();
-                if (flowerIdsToAdd.Any())
-                {
-                    var newBouquetFlowers = flowerIdsToAdd.Select(flowerId => new BouquetFlower()
-                    {
-                        Bouquet = bouquet,
-                        FlowerId = flowerId,
-                        FlowerCount = descriptor.FlowerCount,
-                    }).ToList();
-                    await _uow.BouquetFlowerRepository.AddRangeAsync(newBouquetFlowers);
-                }
-            }
-
-            await _uow.FlowerRepository.Save();
+            return bouquet != null && bouquet.User.Id == userId;
         }
+
+        //public async Task UpdateBouquetAsync(UpdateBouquetDescriptor descriptor)
+        //{
+        //    Bouquet bouquet = await _uow.BouquetRepository.FindAsync(descriptor.BouquetId);
+        //    if (bouquet == null)
+        //    {
+        //        throw new Exception($"Bouquet with ID {descriptor.BouquetId} was not found.");
+        //    }
+
+        //    bouquet.BouquetName = descriptor.BouquetName;
+        //    bouquet.BouquetDescription = descriptor.BouquetDescription;
+
+        //    if (descriptor.Flowers != null && descriptor.Flowers.Any())
+        //    {
+        //        var existingBouquetFlowers = await _uow.BouquetFlowerRepository.GetByBouquetIdAsync(bouquet.BouquetId);
+        //        var existingFlowerIds = existingBouquetFlowers.Select(bf => bf.FlowerId).ToList();
+        //        var updatedFlowerIds = descriptor.Flowers.Select(f => f.FlowerId).ToList();
+
+        //        var flowerIdsToRemove = existingFlowerIds.Except(updatedFlowerIds).ToList();
+        //        if (flowerIdsToRemove.Any())
+        //        {
+        //            var flowersToRemove = existingBouquetFlowers.Where(bf => flowerIdsToRemove.Contains(bf.FlowerId)).ToList();
+        //            await _uow.BouquetFlowerRepository.RemoveRangeAsync(flowersToRemove);
+        //        }
+
+        //        foreach (var flowerDescriptor in descriptor.Flowers)
+        //        {
+        //            var existingBouquetFlower = existingBouquetFlowers.FirstOrDefault(bf => bf.FlowerId == flowerDescriptor.FlowerId);
+        //            if (existingBouquetFlower != null)
+        //            {
+        //                existingBouquetFlower.FlowerCount = flowerDescriptor.FlowerCount;
+        //            }
+        //            else
+        //            {
+        //                var newBouquetFlower = new BouquetFlower()
+        //                {
+        //                    Bouquet = bouquet,
+        //                    FlowerId = flowerDescriptor.FlowerId,
+        //                    FlowerCount = flowerDescriptor.FlowerCount
+        //                };
+        //                await _uow.BouquetFlowerRepository.AddAsync(newBouquetFlower);
+        //            }
+        //        }
+        //    }
+
+        //    await _uow.FlowerRepository.Save();
+        //}
     }
 }
