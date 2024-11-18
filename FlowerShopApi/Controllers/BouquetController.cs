@@ -48,7 +48,7 @@ namespace FlowerShopApi.Controllers
             return Ok(new { Message = "Bouquet deleted successfully." });
         }
 
-        [HttpGet("{userId}"), Authorize(Roles = "Admin, Customer")]
+        [HttpGet("{userId}"), Authorize]
         public async Task<IActionResult> GetBouquetsByUserIdAsync(int userId)
         {
             try

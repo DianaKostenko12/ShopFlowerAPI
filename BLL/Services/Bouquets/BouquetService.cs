@@ -60,7 +60,7 @@ namespace BLL.Services.Bouquets
             {
                 throw new KeyNotFoundException($"Bouquet with ID {bouquetId} was not found.");
             }
-            User recordAuthor = await _userManager.FindByIdAsync(userId.ToString());
+            User recordAuthor = await _userManager.FindByIdAsync(bouquetToDelete.User.Id.ToString());
             IList<string> recordAuthorRoles = await _userManager.GetRolesAsync(recordAuthor);
 
             User editor = await _userManager.FindByIdAsync(userId.ToString());
@@ -90,9 +90,21 @@ namespace BLL.Services.Bouquets
             return bouquets;
         }
 
-        public Task<List<Bouquet>> GetBouquetsByFilterAsync(BouquetFilterView view)
+        public async Task<List<Bouquet>> GetBouquetsByFilterAsync(BouquetFilterView view)
         {
-            return _uow.BouquetRepository.GetBouquetsByFilterAsync(view);
+            List<Bouquet> bouquets =  await _uow.BouquetRepository.GetBouquetsByFilterAsync(view);
+            List<Bouquet> filterBouquets = new List<Bouquet>();
+            foreach (var bouquet in bouquets)
+            {
+                User creator = await _userManager.FindByIdAsync(bouquet.User.Id.ToString());
+                IList<string> creatorRoles = await _userManager.GetRolesAsync(creator);
+                if (creatorRoles.Contains(Roles.Customer))
+                {
+                    filterBouquets.Add(bouquet);
+                }
+            }
+
+            return filterBouquets;
         }
 
         public async Task<bool> IsUserBouquetOwnerAsync(int bouquetId, int userId)

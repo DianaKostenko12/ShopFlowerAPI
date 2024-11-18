@@ -11,6 +11,7 @@ namespace DAL.Models
         public int OrderId { get; set; }
         public DateTime OrderDate { get; set; }
         public string Status { get; set; }
+        public string DeliveryStreet { get; set; }
         public ICollection<OrderBouquet> OrderBouquets { get; set; }
         public User User { get; set; }
     }

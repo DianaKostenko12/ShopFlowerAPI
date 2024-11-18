@@ -51,7 +51,7 @@ namespace BLL.Services.Auth
                 throw new BusinessException(HttpStatusCode.InternalServerError, message);
             }
 
-            await _userManager.AddToRoleAsync(registerUser, "Admin");
+            await _userManager.AddToRoleAsync(registerUser, "Customer");
         }
 
         public async Task<string> LoginAsync(LoginDescriptor descriptor)

@@ -51,6 +51,7 @@ namespace DAL.Repositories.Bouquets
                 .Include(b => b.BouquetsFlowers)
                 .ThenInclude(bf => bf.Flower)
                 .Where(f => f.IsDeleted == false)
+                .Include(b => b.User)
                 .AsQueryable();
 
             if (view.MinPrice > 0 || view.MaxPrice > 0)
