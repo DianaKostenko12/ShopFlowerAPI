@@ -8,6 +8,6 @@
         Task RemoveRangeAsync(IEnumerable<TEntity> entities);
         Task<IEnumerable<TEntity>> FindAllAsync();
         Task<TEntity> FindAsync(int id);
-        Task<bool> Save();
+        //Task<bool> Save();
     }
 }

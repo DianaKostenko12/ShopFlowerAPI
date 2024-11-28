@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore;
+using DAL.Models.Orders;
 
 namespace DAL.Data
 {
@@ -50,6 +51,12 @@ namespace DAL.Data
                 .WithMany(ob => ob.OrderBouquets)
                 .HasForeignKey(o => o.OrderId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Flower>(entity =>
+            {
+                entity.Property(e => e.FlowerCost)
+                      .HasColumnType("decimal(18,2)");
+            });
 
             base.OnModelCreating(modelBuilder);
         }

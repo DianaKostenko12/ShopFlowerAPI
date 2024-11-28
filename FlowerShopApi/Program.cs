@@ -1,6 +1,8 @@
 using BLL.Services.Auth;
 using BLL.Services.Bouquets;
 using BLL.Services.Flowers;
+using BLL.Services.OrderBouquets;
+using BLL.Services.Orders;
 using DAL.Data;
 using DAL.Data.UnitOfWork;
 using DAL.Models;
@@ -58,6 +60,8 @@ builder.Services.AddScoped<IBouquetFlowerRepository, BouquetFlowerRepository>();
 builder.Services.AddScoped<IOrderBouquetRepository, OrderBouquetRepository>();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IOrderBouquetService, OrderBouquetService>();
 builder.Services.AddScoped<IFlowerService, FlowerService>();
 builder.Services.AddScoped<IBouquetService, BouquetService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();

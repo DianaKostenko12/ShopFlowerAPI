@@ -15,7 +15,7 @@ namespace FlowerShopApi.Controllers
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IBouquetService _bouquetService;
-        private readonly IMapper _mapper;
+        private readonly IMapper _mapper; 
 
         public BouquetController(IBouquetService bouquetService, IHttpContextAccessor httpContextAccessor, IMapper mapper)
         {
@@ -24,7 +24,7 @@ namespace FlowerShopApi.Controllers
             _mapper = mapper;
         }
 
-        [HttpPost, Authorize(Roles = "Admin, Customer")]
+        [HttpPost, Authorize]
         public async Task<IActionResult> AddBouquetAsync([FromBody] CreateBouquetDescriptor descriptor)
         {
             try
@@ -49,8 +49,9 @@ namespace FlowerShopApi.Controllers
         }
 
         [HttpGet("{userId}"), Authorize]
-        public async Task<IActionResult> GetBouquetsByUserIdAsync(int userId)
+        public async Task<IActionResult> GetBouquetsByUserIdAsync()
         {
+            int userId = _httpContextAccessor.HttpContext.User.GetUserId();
             try
             {
                 var bouquets = await _bouquetService.GetBouquetsByUserIdAsync(userId);

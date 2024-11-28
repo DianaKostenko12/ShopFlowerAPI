@@ -2,6 +2,7 @@
 using DAL.Models;
 using DAL.Repositories.Base;
 using DAL.Repositories.Bouquets;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,11 @@ namespace DAL.Repositories.OrderBouquets
     {
         public OrderBouquetRepository(DataContext context) : base(context)
         {
+        }
+
+        public async Task<List<OrderBouquet>> GetByOrderIdAsync(int orderId)
+        {
+            return await Sourse.Where(ob => ob.OrderId == orderId).ToListAsync();
         }
     }
 }

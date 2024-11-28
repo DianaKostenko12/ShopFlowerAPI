@@ -39,6 +39,12 @@ namespace BLL.Services.Bouquets
 
                 foreach (var flower in descriptor.Flowers)
                 {
+                    var flowerExists = await _uow.FlowerRepository.FindAsync(flower.FlowerId);
+                    if (flowerExists == null)
+                    {
+                        throw new ArgumentException($"Flower with ID {flower.FlowerId} does not exist.");
+                    }
+
                     newBouquetFlowers.Add(new BouquetFlower()
                     {
                         Bouquet = newBouquet,
@@ -50,7 +56,7 @@ namespace BLL.Services.Bouquets
                 await _uow.BouquetFlowerRepository.AddRangeAsync(newBouquetFlowers);
             }
 
-            await _uow.BouquetRepository.Save();
+            await _uow.CompleteAsync();
         }
 
         public async Task DeleteBouquetAsync(int bouquetId, int userId)
@@ -77,7 +83,7 @@ namespace BLL.Services.Bouquets
             }
 
             await _uow.BouquetRepository.RemoveAsync(bouquetToDelete);
-            await _uow.BouquetRepository.Save();
+            await _uow.CompleteAsync();
         }
 
         public async Task<List<Bouquet>> GetBouquetsByUserIdAsync(int userId)

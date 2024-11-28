@@ -1,4 +1,5 @@
 ﻿using DAL.Models;
+using DAL.Models.Orders;
 using DAL.Repositories.Base;
 using System;
 using System.Collections.Generic;
@@ -10,5 +11,6 @@ namespace DAL.Repositories.Orders
 {
     public interface IOrderRepository : IBaseRepository<Order>
     {
+        Task<List<Order>> GetOrdersByUserIdAsync(int userId);
     }
 }

@@ -11,7 +11,7 @@ namespace DAL.Models
         public int FlowerId { get; set; }
         public string FlowerName { get; set; }
         public int FlowerCount { get; set; }
-        public float FlowerCost { get; set; }
+        public decimal FlowerCost { get; set; }
         public bool IsDeleted { get; set; }
         public ICollection<BouquetFlower> BouquetsFlowers { get; set; }
     }

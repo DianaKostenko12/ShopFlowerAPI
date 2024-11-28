@@ -24,7 +24,7 @@ namespace BLL.Services.Flowers
 
             await _uow.FlowerRepository.AddAsync(flowerToCreate);
 
-            await _uow.FlowerRepository.Save();
+            await _uow.CompleteAsync();
         }
 
         public async Task DeleteFlowerAsync(int flowerId)
@@ -36,7 +36,7 @@ namespace BLL.Services.Flowers
             }
 
             await _uow.FlowerRepository.RemoveAsync(flowerToDelete);
-            await _uow.FlowerRepository.Save();
+            await _uow.CompleteAsync();
         }
 
         public async Task<Flower> GetFlowerByIdAsync(int floweId)
@@ -61,7 +61,7 @@ namespace BLL.Services.Flowers
             flower.FlowerCost = descriptor.FlowerCost;
             flower.FlowerCount = descriptor.FlowerCount;
 
-            await _uow.FlowerRepository.Save();
+            await _uow.CompleteAsync();
         }
     }
 }

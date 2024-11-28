@@ -46,10 +46,10 @@ namespace DAL.Repositories.Base
             return await Sourse.FindAsync(id);
         }
 
-        public async Task<bool> Save()
-        {
-            var saved = await _context.SaveChangesAsync();
-            return saved > 0 ? true : false;
-        }
+        //public async Task<bool> Save()
+        //{
+        //    var saved = await _context.SaveChangesAsync();
+        //    return saved > 0 ? true : false;
+        //}
     }
 }

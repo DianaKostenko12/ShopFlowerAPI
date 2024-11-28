@@ -16,6 +16,10 @@ namespace FlowerShopApi.DTOs
         [Required(ErrorMessage = "Street is required")]
         public string Street { get; set; }
 
+        [Phone]
+        [Required(ErrorMessage = "Phone is required")]
+        public string Phone {  get; set; }
+
         [EmailAddress]
         [Required(ErrorMessage = "Email is required")]
         public string Email { get; set; }

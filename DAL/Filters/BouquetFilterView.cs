@@ -8,8 +8,8 @@ namespace DAL.Filters
 {
     public class BouquetFilterView
     {
-        public float MinPrice { get; set; }
-        public float MaxPrice { get; set; }
+        public decimal MinPrice { get; set; }
+        public decimal MaxPrice { get; set; }
         public List<int> FlowerIds { get; set; }
     }
 }
