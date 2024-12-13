@@ -3,6 +3,7 @@ using BLL.Services.Bouquets;
 using BLL.Services.Flowers;
 using BLL.Services.OrderBouquets;
 using BLL.Services.Orders;
+using BLL.Services.Users;
 using DAL.Data;
 using DAL.Data.UnitOfWork;
 using DAL.Models;
@@ -11,6 +12,7 @@ using DAL.Repositories.Bouquets;
 using DAL.Repositories.Flowers;
 using DAL.Repositories.OrderBouquets;
 using DAL.Repositories.Orders;
+using FlowerShopApi.Middlewares;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +22,17 @@ using Swashbuckle.AspNetCore.Filters;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        corsBuilder =>
+        {
+            corsBuilder.AllowAnyOrigin()
+                       .AllowAnyMethod()
+                       .AllowAnyHeader();
+        });
+});
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -64,6 +77,7 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IOrderBouquetService, OrderBouquetService>();
 builder.Services.AddScoped<IFlowerService, FlowerService>();
 builder.Services.AddScoped<IBouquetService, BouquetService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddAuthentication(options =>
@@ -98,7 +112,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseHttpsRedirection();
+
+app.UseCors("AllowAll");
 
 app.UseAuthentication();
 

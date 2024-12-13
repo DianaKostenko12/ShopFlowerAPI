@@ -39,8 +39,8 @@ namespace BLL.Services.Auth
                 UserName = descriptor.Username,
                 FirstName = descriptor.FirstName,
                 LastName = descriptor.LastName,
-                Street = descriptor.Street,
                 Email = descriptor.Email,
+                PhoneNumber = descriptor.Phone,
                 SecurityStamp = Guid.NewGuid().ToString(),
             };
 

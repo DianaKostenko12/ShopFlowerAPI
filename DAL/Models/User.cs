@@ -12,8 +12,6 @@ namespace DAL.Models
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public string Street { get; set; }
-        public string Phone { get; set; }
         public ICollection<Order> Orders { get; set; }
     }
 }

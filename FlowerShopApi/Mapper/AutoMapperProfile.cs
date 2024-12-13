@@ -8,6 +8,7 @@ using FlowerShopApi.DTOs;
 using FlowerShopApi.DTOs.Bouquets;
 using FlowerShopApi.DTOs.Flowers;
 using FlowerShopApi.DTOs.Orders;
+using FlowerShopApi.DTOs.Users;
 
 namespace FlowerShopApi.Mapper
 {
@@ -39,6 +40,8 @@ namespace FlowerShopApi.Mapper
 
             CreateMap<OrderBouquet, BouquetDetails>()
                 .ForMember(dest => dest.BouquetName, opt => opt.MapFrom(src => src.Bouquet.BouquetName));
+
+            CreateMap<User, UserResponse>();
         }
     }
 }
