@@ -80,8 +80,8 @@ namespace FlowerShopApi.Controllers
             }
         }
 
-        [HttpPut("{orderId}/status"), Authorize]
-        public async Task<ActionResult> ChangeOrderStatus(int orderId, [FromBody] OrderStatus status)
+        [HttpPut("{orderId}/status/{status}"), Authorize]
+        public async Task<ActionResult> ChangeOrderStatus(int orderId, OrderStatus status)
         {
             try
             {
