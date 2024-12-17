@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
+using Azure.Core;
 using BLL.Services.Bouquets.Descriptors;
+using BLL.Services.FileStorage;
 using DAL.Data.UnitOfWork;
 using DAL.Exceptions;
 using DAL.Filters;
@@ -14,6 +16,7 @@ namespace BLL.Services.Bouquets
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly UserManager<User> _userManager;
+        private readonly IFileStorage _fileStorage;
 
         public BouquetService(IUnitOfWork uow, IMapper mapper, UserManager<User> userManager)
         {
@@ -25,6 +28,8 @@ namespace BLL.Services.Bouquets
         public async Task AddBouquetAsync(CreateBouquetDescriptor descriptor, int userId)
         {
             var user = await _userManager.FindByIdAsync(userId.ToString());
+            string fileName = await _fileStorage.AddFileAsync(descriptor.Photo);
+
             var newBouquet = new Bouquet()
             {
                 BouquetName = descriptor.BouquetName,

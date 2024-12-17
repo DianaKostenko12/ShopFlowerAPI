@@ -19,14 +19,15 @@ namespace FlowerShopApi.Mapper
             CreateMap<RegisterRequest, RegisterDescriptor>();
             CreateMap<LoginRequest, LoginDescriptor>();
 
-            CreateMap<FlowerRequest, Flower>();
-            CreateMap<Flower, FlowerRequest>();
+            CreateMap<FlowerResponse, Flower>();
+            CreateMap<Flower, FlowerResponse>()
+                .ForMember(dest => dest.ImgUrl, opt => opt.MapFrom(src => src.PhotoFileName));
 
             CreateMap<CreateFlower, CreateFlowerDescriptor>();
             CreateMap<CreateFlowerDescriptor, CreateFlower>();
 
-            CreateMap<FlowerRequest, UpdateFlowerDescriptor>();
-            CreateMap<UpdateFlowerDescriptor, FlowerRequest>();
+            CreateMap<FlowerResponse, UpdateFlowerDescriptor>();
+            CreateMap<UpdateFlowerDescriptor, FlowerResponse>();
 
             CreateMap<Bouquet, GetBouquetResponse>()
             .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Price));

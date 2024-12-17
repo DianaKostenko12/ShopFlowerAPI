@@ -11,6 +11,7 @@ namespace DAL.Models
         public int BouquetId { get; set; }
         public string BouquetName { get; set; }
         public string BouquetDescription { get; set; }
+        public string PhotoFileName { get; set; }
         public bool IsDeleted { get; set; }
         public User User { get; set; }
         public ICollection<BouquetFlower> BouquetsFlowers { get; set; }

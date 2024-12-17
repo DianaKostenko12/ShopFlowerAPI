@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Azure.Core;
+using BLL.Services.FileStorage;
 using BLL.Services.Flowers.Descriptors;
 using DAL.Data.UnitOfWork;
 using DAL.Models;
@@ -9,18 +11,25 @@ namespace BLL.Services.Flowers
     {
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
+        private readonly IFileStorage _fileStorage;
 
-        public FlowerService(IUnitOfWork uow, IMapper mapper)
+
+        public FlowerService(IUnitOfWork uow, IMapper mapper, IFileStorage fileStorage)
         {
             _uow = uow;
             _mapper = mapper;
+            _fileStorage = fileStorage;
         }
+
         public async Task AddFlowerAsync(CreateFlowerDescriptor descriptor)
         {
             if(descriptor == null)
                 throw new ArgumentNullException(nameof(descriptor));
 
+            string fileName = await _fileStorage.AddFileAsync(descriptor.Photo);
+
             var flowerToCreate = _mapper.Map<Flower>(descriptor);
+            flowerToCreate.PhotoFileName = fileName;
 
             await _uow.FlowerRepository.AddAsync(flowerToCreate);
 

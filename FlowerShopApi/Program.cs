@@ -1,5 +1,6 @@
 using BLL.Services.Auth;
 using BLL.Services.Bouquets;
+using BLL.Services.FileStorage;
 using BLL.Services.Flowers;
 using BLL.Services.OrderBouquets;
 using BLL.Services.Orders;
@@ -16,6 +17,7 @@ using FlowerShopApi.Middlewares;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
@@ -79,6 +81,8 @@ builder.Services.AddScoped<IFlowerService, FlowerService>();
 builder.Services.AddScoped<IBouquetService, BouquetService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+var uploadPath = Path.Combine(builder.Environment.ContentRootPath, "UploadedFiles");
+builder.Services.AddScoped<IFileStorage>(_ => new FileStorage(uploadPath));
 
 builder.Services.AddAuthentication(options =>
 {
@@ -120,6 +124,12 @@ app.UseCors("AllowAll");
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(Path.Combine(builder.Environment.ContentRootPath, "UploadedFiles")),
+    RequestPath = "/uploads"
+});
 
 app.MapControllers();
 
