@@ -30,7 +30,8 @@ namespace FlowerShopApi.Mapper
             CreateMap<UpdateFlowerDescriptor, FlowerResponse>();
 
             CreateMap<Bouquet, GetBouquetResponse>()
-            .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Price));
+            .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Price))
+            .ForMember(dest => dest.PhotoFileName, opt => opt.MapFrom(src => src.PhotoFileName));
 
             CreateMap<Order, OrderResponse>()
             .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Price))

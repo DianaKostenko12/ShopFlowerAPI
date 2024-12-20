@@ -74,8 +74,5 @@ namespace FlowerShopApi.Controllers
             await _flowerService.DeleteFlowerAsync(flowerId);
             return Ok("Flower successfully deleted.");
         }
-
-       
-                
     }
 }

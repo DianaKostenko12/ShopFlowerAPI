@@ -18,50 +18,68 @@ namespace BLL.Services.Bouquets
         private readonly UserManager<User> _userManager;
         private readonly IFileStorage _fileStorage;
 
-        public BouquetService(IUnitOfWork uow, IMapper mapper, UserManager<User> userManager)
+        public BouquetService(IUnitOfWork uow, IMapper mapper, UserManager<User> userManager, IFileStorage fileStorage)
         {
             _uow = uow;
             _mapper = mapper;
             _userManager = userManager;
+            _fileStorage = fileStorage;
         }
 
         public async Task AddBouquetAsync(CreateBouquetDescriptor descriptor, int userId)
         {
             var user = await _userManager.FindByIdAsync(userId.ToString());
-            string fileName = await _fileStorage.AddFileAsync(descriptor.Photo);
-
-            var newBouquet = new Bouquet()
+            try
             {
-                BouquetName = descriptor.BouquetName,
-                BouquetDescription = descriptor.BouquetDescription,
-                User = user,
-            };
-            await _uow.BouquetRepository.AddAsync(newBouquet);
-
-            if (descriptor.Flowers != null && descriptor.Flowers.Any())
-            {
-                List<BouquetFlower> newBouquetFlowers = new List<BouquetFlower>();
-
-                foreach (var flower in descriptor.Flowers)
+                if (descriptor.Photo == null)
                 {
-                    var flowerExists = await _uow.FlowerRepository.FindAsync(flower.FlowerId);
-                    if (flowerExists == null)
-                    {
-                        throw new ArgumentException($"Flower with ID {flower.FlowerId} does not exist.");
-                    }
-
-                    newBouquetFlowers.Add(new BouquetFlower()
-                    {
-                        Bouquet = newBouquet,
-                        FlowerId = flower.FlowerId,
-                        FlowerCount = flower.FlowerCount
-                    });
+                    throw new ArgumentNullException(nameof(descriptor.Photo), "Photo cannot be null.");
                 }
 
-                await _uow.BouquetFlowerRepository.AddRangeAsync(newBouquetFlowers);
-            }
+                if (_fileStorage == null)
+                {
+                    throw new InvalidOperationException("FileStorage service is not initialized.");
+                }
 
-            await _uow.CompleteAsync();
+                string fileName = await _fileStorage.AddFileAsync(descriptor.Photo);
+                var newBouquet = new Bouquet()
+                {
+                    BouquetName = descriptor.BouquetName,
+                    BouquetDescription = descriptor.BouquetDescription,
+                    PhotoFileName = fileName,
+                    User = user,
+                };
+                await _uow.BouquetRepository.AddAsync(newBouquet);
+
+                if (descriptor.Flowers != null && descriptor.Flowers.Any())
+                {
+                    List<BouquetFlower> newBouquetFlowers = new List<BouquetFlower>();
+
+                    foreach (var flower in descriptor.Flowers)
+                    {
+                        var flowerExists = await _uow.FlowerRepository.FindAsync(flower.FlowerId);
+                        if (flowerExists == null)
+                        {
+                            throw new ArgumentException($"Flower with ID {flower.FlowerId} does not exist.");
+                        }
+
+                        newBouquetFlowers.Add(new BouquetFlower()
+                        {
+                            Bouquet = newBouquet,
+                            FlowerId = flower.FlowerId,
+                            FlowerCount = flower.FlowerCount
+                        });
+                    }
+
+                    await _uow.BouquetFlowerRepository.AddRangeAsync(newBouquetFlowers);
+                }
+
+                await _uow.CompleteAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public async Task DeleteBouquetAsync(int bouquetId, int userId)
@@ -109,7 +127,7 @@ namespace BLL.Services.Bouquets
             {
                 User creator = await _userManager.FindByIdAsync(bouquet.User.Id.ToString());
                 IList<string> creatorRoles = await _userManager.GetRolesAsync(creator);
-                if (creatorRoles.Contains(Roles.Customer))
+                if (creatorRoles.Contains(Roles.Admin))
                 {
                     filterBouquets.Add(bouquet);
                 }

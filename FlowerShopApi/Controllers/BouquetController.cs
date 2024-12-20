@@ -2,6 +2,7 @@
 using BLL.Services.Bouquets;
 using BLL.Services.Bouquets.Descriptors;
 using DAL.Filters;
+using DAL.Models;
 using FlowerShopApi.Common.Extensions;
 using FlowerShopApi.DTOs.Bouquets;
 using Microsoft.AspNetCore.Authorization;
@@ -25,7 +26,7 @@ namespace FlowerShopApi.Controllers
         }
 
         [HttpPost, Authorize]
-        public async Task<IActionResult> AddBouquetAsync([FromBody] CreateBouquetDescriptor descriptor)
+        public async Task<IActionResult> AddBouquetAsync([FromForm] CreateBouquetDescriptor descriptor)
         {
             try
             {
@@ -71,6 +72,10 @@ namespace FlowerShopApi.Controllers
             {
                 var bouquets = await _bouquetService.GetBouquetsByFilterAsync(view);
                 var bouquetsDto = _mapper.Map<List<GetBouquetResponse>>(bouquets);
+                for (int i = 0; i < bouquetsDto.Count; i++)
+                {
+                    bouquetsDto[i].PhotoFileName = $"{Request.Scheme}://{Request.Host}/uploads/{bouquetsDto[i].PhotoFileName}";
+                }
                 return Ok(bouquetsDto);
             }
             catch (Exception ex)
