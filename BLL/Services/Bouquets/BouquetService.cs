@@ -119,7 +119,7 @@ namespace BLL.Services.Bouquets
             return bouquets;
         }
 
-        public async Task<List<Bouquet>> GetBouquetsByFilterAsync(BouquetFilterView view)
+        public async Task<List<Bouquet>> GetBouquetsByFilterAsync(BouquetFilterView view, int? userId)
         {
             List<Bouquet> bouquets =  await _uow.BouquetRepository.GetBouquetsByFilterAsync(view);
             List<Bouquet> filterBouquets = new List<Bouquet>();
@@ -133,7 +133,18 @@ namespace BLL.Services.Bouquets
                 }
             }
 
-            return filterBouquets;
+            if(userId.HasValue)
+            {
+                foreach (var bouquet in bouquets)
+                {
+                    if (await IsUserBouquetOwnerAsync(bouquet.BouquetId, userId.Value))
+                    {
+                        filterBouquets.Add(bouquet);
+                    }
+                }
+            }
+
+            return filterBouquets.DistinctBy(x => x.BouquetId).ToList();
         }
 
         public async Task<bool> IsUserBouquetOwnerAsync(int bouquetId, int userId)

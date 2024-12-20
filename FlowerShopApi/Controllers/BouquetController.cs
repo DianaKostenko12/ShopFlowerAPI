@@ -30,8 +30,8 @@ namespace FlowerShopApi.Controllers
         {
             try
             {
-                int userId = _httpContextAccessor.HttpContext.User.GetUserId();
-                await _bouquetService.AddBouquetAsync(descriptor, userId);
+                int? userId = _httpContextAccessor.HttpContext.User.GetUserId();
+                await _bouquetService.AddBouquetAsync(descriptor, userId.Value);
                 return Ok(new { Message = "Bouquet added successfully." });
             }
             catch (Exception ex)
@@ -43,8 +43,8 @@ namespace FlowerShopApi.Controllers
         [HttpDelete, Authorize]
         public async Task<IActionResult> DeleteBouquetAsync(int bouquetId)
         {
-            int userId = _httpContextAccessor.HttpContext.User.GetUserId();
-            await _bouquetService.DeleteBouquetAsync(bouquetId, userId);
+            int? userId = _httpContextAccessor.HttpContext.User.GetUserId();
+            await _bouquetService.DeleteBouquetAsync(bouquetId, userId.Value);
 
             return Ok(new { Message = "Bouquet deleted successfully." });
         }
@@ -52,10 +52,10 @@ namespace FlowerShopApi.Controllers
         [HttpGet, Authorize]
         public async Task<IActionResult> GetBouquetsByUserIdAsync()
         {
-            int userId = _httpContextAccessor.HttpContext.User.GetUserId();
+            int? userId = _httpContextAccessor.HttpContext.User.GetUserId();
             try
             {
-                var bouquets = await _bouquetService.GetBouquetsByUserIdAsync(userId);
+                var bouquets = await _bouquetService.GetBouquetsByUserIdAsync(userId.Value);
                 var bouquetsDto = _mapper.Map<List<GetBouquetResponse>>(bouquets);
                 return Ok(bouquetsDto);
             }
@@ -70,7 +70,8 @@ namespace FlowerShopApi.Controllers
         {
             try
             {
-                var bouquets = await _bouquetService.GetBouquetsByFilterAsync(view);
+                int? userId = _httpContextAccessor.HttpContext.User.GetUserId();
+                var bouquets = await _bouquetService.GetBouquetsByFilterAsync(view, userId);
                 var bouquetsDto = _mapper.Map<List<GetBouquetResponse>>(bouquets);
                 for (int i = 0; i < bouquetsDto.Count; i++)
                 {

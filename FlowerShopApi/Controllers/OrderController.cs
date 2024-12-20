@@ -46,10 +46,10 @@ namespace FlowerShopApi.Controllers
         [HttpGet("user/userId"), Authorize(Roles = "Customer")]
         public async Task<ActionResult<IEnumerable<Order>>> GetOrdersByUserId()
         {
-            int userId = _httpContextAccessor.HttpContext.User.GetUserId();
+            int? userId = _httpContextAccessor.HttpContext.User.GetUserId();
             try
             {
-                var orders = await _orderService.GetOrdersByUserId(userId);
+                var orders = await _orderService.GetOrdersByUserId(userId.Value);
                 var orderResponses = _mapper.Map<List<OrderResponse>>(orders);
                 foreach (var orderResponse in orderResponses)
                 {
@@ -70,8 +70,8 @@ namespace FlowerShopApi.Controllers
         {
             try
             {
-                int userId = _httpContextAccessor.HttpContext.User.GetUserId();
-                await _orderService.AddOrderAsync(descriptor, userId);
+                int? userId = _httpContextAccessor.HttpContext.User.GetUserId();
+                await _orderService.AddOrderAsync(descriptor, userId.Value);
                 return CreatedAtAction(nameof(GetOrders), new { userId = userId }, descriptor);
             }
             catch (Exception ex)

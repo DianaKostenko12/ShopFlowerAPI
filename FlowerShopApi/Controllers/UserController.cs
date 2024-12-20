@@ -24,10 +24,10 @@ namespace FlowerShopApi.Controllers
         [HttpGet, Authorize]
         public async Task<IActionResult> GetUserById()
         {
-            int userId = _httpContextAccessor.HttpContext.User.GetUserId();
+            int? userId = _httpContextAccessor.HttpContext.User.GetUserId();
             try
             {
-                var user = await _userService.GetUserById(userId);
+                var user = await _userService.GetUserById(userId.Value);
                 var userDto = _mapper.Map<UserResponse>(user);
                 return Ok(userDto);
             }

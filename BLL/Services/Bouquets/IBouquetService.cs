@@ -16,7 +16,7 @@ namespace BLL.Services.Bouquets
         //Task UpdateBouquetAsync(UpdateBouquetDescriptor descriptor);
         Task DeleteBouquetAsync(int bouquetId, int userId);
         Task<List<Bouquet>> GetBouquetsByUserIdAsync(int userId);
-        Task<List<Bouquet>> GetBouquetsByFilterAsync(BouquetFilterView view);
+        Task<List<Bouquet>> GetBouquetsByFilterAsync(BouquetFilterView view, int? userId);
         Task<bool> IsUserBouquetOwnerAsync(int bouquetId, int userId);
     }
 }
