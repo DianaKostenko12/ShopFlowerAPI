@@ -1,11 +1,9 @@
 ﻿using AutoMapper;
-using BLL.Services.Bouquets;
 using BLL.Services.OrderBouquets;
 using BLL.Services.Orders;
 using BLL.Services.Orders.Descriptors;
 using DAL.Exceptions;
 using DAL.Models.Orders;
-using DAL.Repositories.OrderBouquets;
 using FlowerShopApi.Common.Extensions;
 using FlowerShopApi.DTOs.Orders;
 using Microsoft.AspNetCore.Authorization;

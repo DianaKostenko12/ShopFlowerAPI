@@ -1,12 +1,8 @@
 ﻿using AutoMapper;
-using BLL.Services.Auth;
 using BLL.Services.Flowers;
 using BLL.Services.Flowers.Descriptors;
-using DAL.Models;
 using FlowerShopApi.DTOs.Flowers;
-using FlowerShopApi.DTOs.Users;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Hosting;
 
 namespace FlowerShopApi.Controllers
 {
@@ -37,9 +33,13 @@ namespace FlowerShopApi.Controllers
             return Ok(flowers);
         }
 
+        record GetFlowerQuery(int Id);
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetFlowerById(int id)
         {
+            
+            var query = new GetFlowerQuery(id); 
             var flowerData = await _flowerService.GetFlowerByIdAsync(id);
             if (flowerData == null)
             {

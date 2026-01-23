@@ -4,6 +4,7 @@ using DAL.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAL.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20260110182901_UpdateFlowerModel")]
+    partial class UpdateFlowerModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -42,13 +45,7 @@ namespace DAL.Migrations
                     b.Property<string>("PhotoFileName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Shape")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("WrappingPaperId")
                         .HasColumnType("int");
 
                     b.HasKey("BouquetId");
@@ -224,28 +221,6 @@ namespace DAL.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
-                });
-
-            modelBuilder.Entity("DAL.Models.WrappingPaper", b =>
-                {
-                    b.Property<int>("WrappingPaperId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WrappingPaperId"));
-
-                    b.Property<string>("Color")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Pattern")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Type")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("WrappingPaperId");
-
-                    b.ToTable("WrappingPapers");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<int>", b =>

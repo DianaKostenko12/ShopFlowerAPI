@@ -1,12 +1,6 @@
 ﻿using DAL.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore;
 using DAL.Models.Orders;
 
@@ -24,7 +18,7 @@ namespace DAL.Data
         public DbSet<Order> Orders { get; set; }
         public DbSet<BouquetFlower> BouquetFlowers { get; set; }
         public DbSet<OrderBouquet> OrderBouquets { get; set; }
-
+        public DbSet<WrappingPaper> WrappingPapers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

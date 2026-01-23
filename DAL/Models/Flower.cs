@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DAL.Models
+﻿namespace DAL.Models
 {
     public class Flower
     { 
@@ -13,6 +7,9 @@ namespace DAL.Models
         public int FlowerCount { get; set; }
         public decimal FlowerCost { get; set; }
         public string PhotoFileName { get; set; }
+        public string Color { get; set; }
+        public string Category { get; set; }
+        public int HeadSizeCm { get; set; }
         public bool IsDeleted { get; set; }
         public ICollection<BouquetFlower> BouquetsFlowers { get; set; }
     }
