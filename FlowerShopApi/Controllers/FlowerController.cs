@@ -38,12 +38,12 @@ namespace FlowerShopApi.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetFlowerById(int flowerId)
+        public async Task<IActionResult> GetFlowerById(int id)
         {
-            var flowerData = await _flowerService.GetFlowerByIdAsync(flowerId);
+            var flowerData = await _flowerService.GetFlowerByIdAsync(id);
             if (flowerData == null)
             {
-                return NotFound($"Flower with ID {flowerId} not found.");
+                return NotFound($"Flower with ID {id} not found.");
             }
 
             var flower = _mapper.Map<FlowerResponse>(flowerData);

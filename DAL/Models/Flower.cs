@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace DAL.Models
 {
     public class Flower
-    {
+    { 
         public int FlowerId { get; set; }
         public string FlowerName { get; set; }
         public int FlowerCount { get; set; }
