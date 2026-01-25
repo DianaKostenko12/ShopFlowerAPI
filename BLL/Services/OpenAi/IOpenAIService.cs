@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿using BLL.Services.BouquetGeneration.Descriptors;
+using BLL.Services.OpenAi.Dto;
 namespace BLL.Services.OpenAi
 {
     internal interface IOpenAIService
     {
-        Task<string> GenerateBouquetDescriptionAsync(
-        string prompt,
+        Task<GptStyleRecommendation> GenerateBouquetDescriptionAsync(
+        GenerateBouquetDescriptor descriptor,
         CancellationToken cancellationToken = default);
 
         Task<byte[]> GenerateBouquetImageAsync(
