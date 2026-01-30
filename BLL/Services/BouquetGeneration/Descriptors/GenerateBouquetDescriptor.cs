@@ -1,7 +1,7 @@
 ﻿namespace BLL.Services.BouquetGeneration.Descriptors
 {
     public record GenerateBouquetDescriptor(
-         string Color,
+         List<string> Color,
          decimal? Budget,
          string Style,
          string Shape,
