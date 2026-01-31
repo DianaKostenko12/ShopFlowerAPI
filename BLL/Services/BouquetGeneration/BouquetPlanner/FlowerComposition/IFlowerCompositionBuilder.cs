@@ -1,14 +1,14 @@
-﻿using BLL.Services.OpenAi.Dto;
-using DAL.Models;
+﻿using BLL.Services.BouquetGeneration.BouquetPlanner.Dto;
+using BLL.Services.OpenAi.Dto;
 
 namespace BLL.Services.BouquetGeneration.BouquetPlanner.FlowerComposition
 {
     internal interface IFlowerCompositionBuilder
     {
         List<Dto.FlowerComposition> BuildFlowersComposition(
-           IEnumerable<Flower> filteredFlowers,
+           List<FlowerWithRole> filteredFlowers,
            GptStyleRecommendation aiStyleRecommendation,
-           decimal budget
+           decimal totalBudget
         );
     }
 }

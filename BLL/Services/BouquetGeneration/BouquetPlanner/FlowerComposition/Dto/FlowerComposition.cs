@@ -1,8 +1,9 @@
-﻿namespace BLL.Services.BouquetGeneration.BouquetPlanner.FlowerComposition.Dto
+﻿using DAL.Models;
+
+namespace BLL.Services.BouquetGeneration.BouquetPlanner.FlowerComposition.Dto
 {
     public sealed record FlowerComposition(
-      int FlowerId,
-      string FlowerName,
+      Flower flower,
       string Role,
       int Quantity,
       decimal UnitPrice
