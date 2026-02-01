@@ -2,7 +2,7 @@
 {
     public record GenerateBouquetDescriptor(
          List<string> Color,
-         decimal? Budget,
+         decimal Budget,
          string Style,
          string Shape,
          string AdditionalComment

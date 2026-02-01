@@ -1,7 +1,5 @@
 ﻿using BLL.Services.BouquetGeneration.BouquetPlanner.Dto;
 using BLL.Services.OpenAi.Dto;
-using DAL.Models;
-using System.Collections.Generic;
 
 namespace BLL.Services.BouquetGeneration.BouquetPlanner.FlowerComposition
 {

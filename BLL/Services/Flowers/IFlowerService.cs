@@ -1,5 +1,4 @@
-﻿
-using BLL.Services.Flowers.Descriptors;
+﻿using BLL.Services.Flowers.Descriptors;
 using DAL.Models;
 
 namespace BLL.Services.Flowers
@@ -9,7 +8,7 @@ namespace BLL.Services.Flowers
         Task AddFlowerAsync(CreateFlowerDescriptor descriptor);
         Task UpdateFlowerAsync(UpdateFlowerDescriptor descriptor);
         Task DeleteFlowerAsync(int flowerId);
-        Task <Flower> GetFlowerByIdAsync(int floweId);
+        Task<Flower> GetFlowerByIdAsync(int floweId);
         Task<IEnumerable<Flower>> GetFlowersAsync();
     }
 }

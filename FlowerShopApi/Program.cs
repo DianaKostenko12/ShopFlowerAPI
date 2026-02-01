@@ -13,6 +13,7 @@ using DAL.Repositories.Bouquets;
 using DAL.Repositories.Flowers;
 using DAL.Repositories.OrderBouquets;
 using DAL.Repositories.Orders;
+using DAL.Repositories.WrappingPaper;
 using FlowerShopApi.Middlewares;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -73,6 +74,7 @@ builder.Services.AddScoped<IBouquetRepository, BouquetRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IBouquetFlowerRepository, BouquetFlowerRepository>();
 builder.Services.AddScoped<IOrderBouquetRepository, OrderBouquetRepository>();
+builder.Services.AddScoped<IWrappingPaperRepository, WrappingPaperRepository>();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IOrderService, OrderService>();

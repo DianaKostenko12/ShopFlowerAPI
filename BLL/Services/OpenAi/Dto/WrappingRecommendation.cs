@@ -2,7 +2,6 @@
 {
     public sealed record WrappingRecommendation
     (
-        List<string> Materials,
         List<string> Colors,
         List<string> Patterns
     );

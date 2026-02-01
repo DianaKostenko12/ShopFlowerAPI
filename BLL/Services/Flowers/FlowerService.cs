@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Azure.Core;
 using BLL.Services.FileStorage;
 using BLL.Services.Flowers.Descriptors;
 using DAL.Data.UnitOfWork;
@@ -12,7 +11,6 @@ namespace BLL.Services.Flowers
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IFileStorage _fileStorage;
-
 
         public FlowerService(IUnitOfWork uow, IMapper mapper, IFileStorage fileStorage)
         {

@@ -1,9 +1,12 @@
 ﻿using BLL.Services.BouquetGeneration.BouquetPlanner.Dto;
+using BLL.Services.BouquetGeneration.BouquetPlanner.FlowerComposition;
 using BLL.Services.BouquetGeneration.Descriptors;
 using BLL.Services.Flowers;
 using BLL.Services.OpenAi;
 using BLL.Services.OpenAi.Dto;
+using BLL.Services.WrappingPapers;
 using DAL.Models;
+using DAL.Repositories.WrappingPapers;
 
 namespace BLL.Services.BouquetGeneration.BouquetPlanner
 {
@@ -11,47 +14,34 @@ namespace BLL.Services.BouquetGeneration.BouquetPlanner
     {
         private readonly IOpenAIService _openAIService;
         private readonly IFlowerService _flowerService;
-        public BouquetPlanner(IOpenAIService openAiService, IFlowerService flowerService)
+        private readonly IFlowerCompositionBuilder _flowerCompositionBuilder;
+        private readonly IWrappingPaperService _wrappingPaperService;
+        public BouquetPlanner(IOpenAIService openAiService, IFlowerService flowerService, IFlowerCompositionBuilder flowerCompositionBuilder, IWrappingPaperService wrappingPaperService)
         {
             _openAIService = openAiService;
             _flowerService = flowerService;
+            _flowerCompositionBuilder = flowerCompositionBuilder;
+            _wrappingPaperService = wrappingPaperService;
         }
         public async Task<BouquetAssemblyPlan> BuildPlanAsync(GenerateBouquetDescriptor descriptor, CancellationToken ct)
         {
             var aiStyleAdvice = await _openAIService.GenerateBouquetDescriptionAsync(descriptor);
 
-            var flowers = _flowerService.GetFlowersAsync();
+            var flowersWithRole = GetFilteredFlowersWithRole(aiStyleAdvice);
 
-            var filteredFlowers = flowers.Result.Where(flower =>
-                aiStyleAdvice.Roles.Focal.Categories.Contains(flower.Category) ||
-                aiStyleAdvice.Roles.Semi.Categories.Contains(flower.Category) ||
-                aiStyleAdvice.Roles.Filler.Categories.Contains(flower.Category) ||
-                aiStyleAdvice.Roles.Greenery.Categories.Contains(flower.Category)
-            )
-            .Where(f =>
-                descriptor.Color.Contains(f.Color) ||
-                aiStyleAdvice.Palette.Primary.Contains(f.Color) ||
-                aiStyleAdvice.Palette.Accent.Contains(f.Color)
-            )
-            .ToList();
+            var wrappingPapers = _wrappingPaperService.GetWrappingPapersAsync();
 
-            var flowersWithRole = filteredFlowers.Select(flower =>
+            var selectedWrappingPaper = wrappingPapers.Result.Where(wp =>
+                    aiStyleAdvice.WrappingPaper.Colors.Contains(wp.Color)
+                    && aiStyleAdvice.WrappingPaper.Patterns.Contains(wp.Pattern)
+            ).FirstOrDefault();
+            
+            if(selectedWrappingPaper == null)
             {
-                var role =
-                    aiStyleAdvice.Roles.Focal.Categories.Contains(flower.Category)
-                        ? RolesConstants.FocalCategory
-                        : aiStyleAdvice.Roles.Greenery.Categories.Contains(flower.Category)
-                        ? RolesConstants.GreeneryCategory
-                        : aiStyleAdvice.Roles.Semi.Categories.Contains(flower.Category)
-                        ? RolesConstants.SemiCategory
-                        : RolesConstants.FillerCategory;
-                return new FlowerWithRole(
-                    role, 
-                    flower, 
-                    CalculateHarmony(flower, role, aiStyleAdvice)
-                );
-            }).ToList();
-
+                selectedWrappingPaper = wrappingPapers.Result.Where(wp => wp.Pattern == "Default" && wp.Color == "Pastel").First();
+            }
+             
+            var completedFlowerComposition = _flowerCompositionBuilder.BuildFlowersComposition(flowersWithRole, aiStyleAdvice, descriptor.Budget);
         }
 
         private double CalculateHarmony(
@@ -62,9 +52,9 @@ namespace BLL.Services.BouquetGeneration.BouquetPlanner
         {
             double harmony = 1.0;
 
-            harmony += aiStyleAdvice.Palette.Primary.Contains(flower.Color) 
+            harmony += aiStyleAdvice.Palette.Primary.Contains(flower.Color)
                     ? 0.4
-                    : aiStyleAdvice.Palette.Accent.Contains(flower.Color) 
+                    : aiStyleAdvice.Palette.Accent.Contains(flower.Color)
                     ? 0.2 : 0;
 
             harmony += role switch
@@ -77,6 +67,40 @@ namespace BLL.Services.BouquetGeneration.BouquetPlanner
             };
 
             return harmony;
+        }
+
+        private List<FlowerWithRole> GetFilteredFlowersWithRole(GptStyleRecommendation aiStyleAdvice)
+        {
+            var flowers = _flowerService.GetFlowersAsync();
+
+            var filteredFlowers = flowers.Result.Where(flower =>
+                aiStyleAdvice.Roles.Focal.Categories.Contains(flower.Category) ||
+                aiStyleAdvice.Roles.Semi.Categories.Contains(flower.Category) ||
+                aiStyleAdvice.Roles.Filler.Categories.Contains(flower.Category) ||
+                aiStyleAdvice.Roles.Greenery.Categories.Contains(flower.Category)
+            )
+            .Where(f =>
+                aiStyleAdvice.Palette.Primary.Contains(f.Color) ||
+                aiStyleAdvice.Palette.Accent.Contains(f.Color)
+            )
+            .ToList();
+
+            return filteredFlowers.Select(flower =>
+                    {
+                    var role =
+                        aiStyleAdvice.Roles.Focal.Categories.Contains(flower.Category)
+                            ? RolesConstants.FocalCategory
+                            : aiStyleAdvice.Roles.Greenery.Categories.Contains(flower.Category)
+                            ? RolesConstants.GreeneryCategory
+                            : aiStyleAdvice.Roles.Semi.Categories.Contains(flower.Category)
+                            ? RolesConstants.SemiCategory
+                            : RolesConstants.FillerCategory;
+                    return new FlowerWithRole(
+                        role,
+                        flower,
+                        CalculateHarmony(flower, role, aiStyleAdvice)
+                    );
+                }).ToList();
         }
     }
 }

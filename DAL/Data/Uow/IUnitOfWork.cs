@@ -3,6 +3,7 @@ using DAL.Repositories.Bouquets;
 using DAL.Repositories.Flowers;
 using DAL.Repositories.OrderBouquets;
 using DAL.Repositories.Orders;
+using DAL.Repositories.WrappingPapers;
 
 namespace DAL.Data.UnitOfWork
 {
@@ -13,7 +14,7 @@ namespace DAL.Data.UnitOfWork
         IOrderRepository OrderRepository { get; }
         IOrderBouquetRepository OrderBouquetRepository { get; }
         IBouquetFlowerRepository BouquetFlowerRepository { get; }
-
+        IWrappingPaperRepository WrappingPaperRepository { get; }
         Task CompleteAsync();
     }
 }

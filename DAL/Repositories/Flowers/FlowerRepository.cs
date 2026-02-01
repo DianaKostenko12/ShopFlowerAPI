@@ -30,7 +30,5 @@ namespace DAL.Repositories.Flowers
                 flowerToRemove.IsDeleted = true;
             }
         }
-
-       
     }
 }
