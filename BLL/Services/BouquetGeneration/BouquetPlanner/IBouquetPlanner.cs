@@ -5,6 +5,6 @@ namespace BLL.Services.BouquetGeneration.BouquetPlanner
 {
     public interface IBouquetPlanner
     {
-        Task<BouquetAssemblyPlan> BuildPlanAsync(GenerateBouquetDescriptor req, CancellationToken ct);
+        Task<BouquetDetails> BuildPlanAsync(GenerateBouquetDescriptor req, CancellationToken ct);
     }
 }

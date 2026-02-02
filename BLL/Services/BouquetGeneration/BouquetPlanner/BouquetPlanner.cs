@@ -6,7 +6,6 @@ using BLL.Services.OpenAi;
 using BLL.Services.OpenAi.Dto;
 using BLL.Services.WrappingPapers;
 using DAL.Models;
-using DAL.Repositories.WrappingPapers;
 
 namespace BLL.Services.BouquetGeneration.BouquetPlanner
 {
@@ -23,7 +22,7 @@ namespace BLL.Services.BouquetGeneration.BouquetPlanner
             _flowerCompositionBuilder = flowerCompositionBuilder;
             _wrappingPaperService = wrappingPaperService;
         }
-        public async Task<BouquetAssemblyPlan> BuildPlanAsync(GenerateBouquetDescriptor descriptor, CancellationToken ct)
+        public async Task<BouquetDetails> BuildPlanAsync(GenerateBouquetDescriptor descriptor, CancellationToken ct)
         {
             var aiStyleAdvice = await _openAIService.GenerateBouquetDescriptionAsync(descriptor);
 
@@ -35,13 +34,15 @@ namespace BLL.Services.BouquetGeneration.BouquetPlanner
                     aiStyleAdvice.WrappingPaper.Colors.Contains(wp.Color)
                     && aiStyleAdvice.WrappingPaper.Patterns.Contains(wp.Pattern)
             ).FirstOrDefault();
-            
-            if(selectedWrappingPaper == null)
+
+            if (selectedWrappingPaper == null)
             {
                 selectedWrappingPaper = wrappingPapers.Result.Where(wp => wp.Pattern == "Default" && wp.Color == "Pastel").First();
             }
-             
-            var completedFlowerComposition = _flowerCompositionBuilder.BuildFlowersComposition(flowersWithRole, aiStyleAdvice, descriptor.Budget);
+
+            var completedComposition = _flowerCompositionBuilder.BuildFlowersComposition(flowersWithRole, aiStyleAdvice, descriptor.Budget);
+
+            return new BouquetDetails(completedComposition, selectedWrappingPaper, descriptor.Shape);
         }
 
         private double CalculateHarmony(
