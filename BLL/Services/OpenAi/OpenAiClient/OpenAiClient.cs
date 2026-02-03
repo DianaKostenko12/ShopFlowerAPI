@@ -13,16 +13,23 @@ namespace BLL.Services.OpenAi.OpenAiClient
         {
             _httpClient = httpClient;
         }
-        public async Task<string> ChatAsync(string prompt, string responseFormat, CancellationToken ct = default)
+        public async Task<string> GenerateTextAsync(string prompt, string responseFormat, CancellationToken cancellationToken = default)
         {
-            var payload = new StringContent(CreatePayload(prompt, responseFormat), Encoding.UTF8, "application/json");
+            var payload = new StringContent(CreatePayloadForText(prompt, responseFormat), Encoding.UTF8, "application/json");
             var result = await _httpClient.PostAsync("/v1/chat/completions", payload);
-            var response = ParseResponse(await result.Content.ReadAsStringAsync());
-
+            var response = ParseResponseForText(await result.Content.ReadAsStringAsync());
             return response;
         }
 
-        private string ParseResponse(string response)
+        public async Task<string> GenerateImageAsync(string prompt, string responseFormat, CancellationToken cancellation = default)
+        {
+            var payload = new StringContent(CreatePayloadForImage(prompt, responseFormat), Encoding.UTF8, "application/json");
+            var result = await _httpClient.PostAsync("/v1/images/generations", payload);
+            var response = ParseResponseForImage(await result.Content.ReadAsStringAsync());
+            return response;
+        }
+
+        private string ParseResponseForText(string response)
         {
             var responseObject = JsonNode.Parse(response);
             return responseObject?["choices"]?[0]?["message"]?["content"]?.GetValue<string>() ?? "Sorry, I don't have a response for you at this time";
@@ -34,7 +41,7 @@ namespace BLL.Services.OpenAi.OpenAiClient
             _httpClient.BaseAddress = new Uri("https://api.openai.com");
         }
 
-        private string CreatePayload(string prompt, string responseFormat)
+        private string CreatePayloadForText(string prompt, string responseFormat)
         {
             var request = new Payload
             {
@@ -66,6 +73,11 @@ namespace BLL.Services.OpenAi.OpenAiClient
             };
 
             return JsonSerializer.Serialize(request);
+        }
+
+        private string CreatePayloadForImage(string prompt, string responseFormat)
+        {
+            var request = new 
         }
     }
 }
