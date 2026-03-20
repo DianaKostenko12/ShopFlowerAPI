@@ -1,4 +1,5 @@
-﻿using BLL.Services.BouquetGeneration.Descriptors;
+﻿using BLL.Services.BouquetGeneration.BouquetPlanner.Dto;
+using BLL.Services.BouquetGeneration.Descriptors;
 using BLL.Services.OpenAi.Dto;
 using BLL.Services.OpenAi.OpenAiClient;
 using BLL.Services.OpenAi.Utils;
@@ -18,14 +19,16 @@ namespace BLL.Services.OpenAi
         {
             var prompt = PromptBuilder.BuildStylePrompt(descriptor);
 
-            var response = await _openAiClient.ChatAsync(prompt, "text");
+            var response = await _openAiClient.GenerateTextAsync(prompt, "text");
 
             return JsonSerializer.Deserialize<GptStyleRecommendation>(response);
         }
 
-        public Task<byte[]> GenerateBouquetImageAsync(string imagePrompt, CancellationToken cancellationToken = default)
+        public async Task<byte[]> GenerateBouquetImageAsync(BouquetDetails bouquetDetails, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var prompt = PromptBuilder.BuildImagePrompt(bouquetDetails);
+
+            return await _openAiClient.GenerateImageAsync(prompt, "image");
         }
     }
 }

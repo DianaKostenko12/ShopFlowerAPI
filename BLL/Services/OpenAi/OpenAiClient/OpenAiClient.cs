@@ -21,7 +21,7 @@ namespace BLL.Services.OpenAi.OpenAiClient
             return response;
         }
 
-        public async Task<string> GenerateImageAsync(string prompt, string responseFormat, CancellationToken cancellation = default)
+        public async Task<byte[]> GenerateImageAsync(string prompt, string responseFormat, CancellationToken cancellation = default)
         {
             var payload = new StringContent(CreatePayloadForImage(prompt, responseFormat), Encoding.UTF8, "application/json");
             var result = await _httpClient.PostAsync("/v1/images/generations", payload);
@@ -33,6 +33,14 @@ namespace BLL.Services.OpenAi.OpenAiClient
         {
             var responseObject = JsonNode.Parse(response);
             return responseObject?["choices"]?[0]?["message"]?["content"]?.GetValue<string>() ?? "Sorry, I don't have a response for you at this time";
+        }
+
+        private byte[] ParseResponseForImage(string response)
+        {
+            var responseObject = JsonNode.Parse(response);
+            var base64Response = responseObject?["data"]?[0]?["b64_json"]?.GetValue<string>();
+
+            return base64Response != null ? Convert.FromBase64String(base64Response) : null;
         }
 
         private void ConfigureClient()
@@ -51,19 +59,17 @@ namespace BLL.Services.OpenAi.OpenAiClient
                 TopP = OpenAiConstants.TopP,
                 FrequencyPenalty = OpenAiConstants.FrequencyPenalty,
                 PresencePenalty = OpenAiConstants.PresencePenalty,
-
-                ResponseFormat = new ResponseFormat
+                ResponseFormat = new()
                 {
                     Type = responseFormat
                 },
-
                 Messages =
                 [
-                    new Message
+                    new()
                     {
                         Content =
                         [
-                            new MessageContent
+                            new()
                             {
                                 Text = prompt
                             }
@@ -77,7 +83,31 @@ namespace BLL.Services.OpenAi.OpenAiClient
 
         private string CreatePayloadForImage(string prompt, string responseFormat)
         {
-            var request = new 
+            var request = new ImageGenerationPayload
+            {
+                Model = OpenAiConstants.Model,
+                Messages =
+                [
+                    new()
+                    {
+                        Content =
+                        [
+                            new MessageContent
+                            {
+                                Text = prompt
+                            }
+                        ]
+                    }
+                ],
+                ResponseFormat = new()
+                {
+                    Type = responseFormat
+                },
+                NumberOfImages = 1,
+                Size = "1024x1024",
+            };
+
+            return JsonSerializer.Serialize(request);
         }
     }
 }

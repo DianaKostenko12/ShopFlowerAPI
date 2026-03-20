@@ -11,24 +11,27 @@ namespace BLL.Services.OpenAi.Utils
     {
         internal static string BuildStylePrompt(GenerateBouquetDescriptor bouquet)
         {
-           return $$"""
+            return $$"""
                 You are a florist assistant.
 
                 Style: {{bouquet.Style}}
                 Color palette: {{bouquet.Color}}
 
                 Task:
-                Suggest suitable flower CATEGORIES for this bouquet style.
+                Suggest suitable flower CATEGORIES for this bouquet style and create a fitting bouquet NAME.
 
                 Rules:
                 - Use only generic categories (e.g. Rose, Peony, Tulip, Eustoma, Greenery).
                 - Max 2 focal categories.
                 - Max 2 filler categories.
                 - Max 1 greenery category.
+                - Create a short, elegant, and creative bouquet name (max 3–5 words).
+                - The name should match the style and color palette.
                 - Do NOT mention specific products or prices.
 
                 Return STRICT JSON in this format:
                 {
+                  "name": "",
                   "focalCategories": [],
                   "fillerCategories": [],
                   "greeneryCategories": []

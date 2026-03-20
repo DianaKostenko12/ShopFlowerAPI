@@ -1,4 +1,5 @@
-﻿using BLL.Services.BouquetGeneration.Descriptors;
+﻿using BLL.Services.BouquetGeneration.BouquetPlanner.Dto;
+using BLL.Services.BouquetGeneration.Descriptors;
 using BLL.Services.OpenAi.Dto;
 namespace BLL.Services.OpenAi
 {
@@ -9,7 +10,7 @@ namespace BLL.Services.OpenAi
         CancellationToken cancellationToken = default);
 
         Task<byte[]> GenerateBouquetImageAsync(
-            string imagePrompt,
+            BouquetDetails bouquetDetails,
             CancellationToken cancellationToken = default);
     }
 }
