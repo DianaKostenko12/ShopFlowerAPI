@@ -11,63 +11,84 @@ namespace BLL.Services.OpenAi.Utils
     {
         internal static string BuildStylePrompt(GenerateBouquetDescriptor bouquet)
         {
+            string bouquetColors = string.Join(",", bouquet.Color);
+
             return $$"""
                 You are a florist assistant.
 
                 Style: {{bouquet.Style}}
                 Shape: {{bouquet.Shape}}
-                Color preference: {{bouquet.Color}}
+                Color preference: {{bouquetColors}}
+                Budget: {{bouquet.Budget}}
 
                 Task:
                 Generate bouquet composition details.
 
-                Rules:
+                STRICT RULES:
+                - Return ONLY valid JSON. No explanations, no markdown, no ``` blocks.
+                - Do not include any text before or after JSON.
+                - All fields are required.
+                - Use camelCase exactly as in schema.
+                - Numbers must be integers.
+
+                COLOR RULES:
+                - Use ONLY simple base colors (one word).
+                - Do NOT use adjectives like "light", "dark", "soft", "pale", "sky", etc.
+                - Examples of valid colors: red, pink, blue, white, yellow, green, purple, beige.
+
+                BUDGET RULES:
+                - The bouquet must realistically fit within the given budget.
+                - Low budget → fewer flowers, simpler composition.
+                - Medium budget → balanced composition.
+                - High budget → richer composition with more focal flowers.
+                - Do NOT generate excessive quantities if budget is limited.
+                - Adjust min/max values according to budget.
+
+                Bouquet rules:
                 - Generate a creative bouquet name (3–5 words).
-                - Palette must include harmonious primary and accent colors.
-                - Use only generic flower categories (e.g. Rose, Peony, Tulip, Eustoma, Greenery).
+                - Palette must include 2–3 primary and 1–2 accent colors.
+                - Use only generic flower categories (Rose, Peony, Tulip, Eustoma, Hydrangea, Ranunculus, Gypsophila, Greenery).
                 - Focal: max 2 categories.
                 - Semi: max 2 categories.
                 - Filler: max 2 categories.
-                - Greenery: max 1 category.
-                - Min/Max should be realistic (e.g. 1–5 stems depending on role).
-                - Wrapping paper should match palette and style.
-                - Do NOT include Style or Shape in response.
+                - Greenery: exactly 1 category.
+                - Wrapping paper must match palette and style.
 
                 Return STRICT JSON in this format:
                 {
-                    "bouquetName": "",
-                    "palette": {
+                  "bouquetName": "",
+                  "palette": {
                     "primary": [],
                     "accent": []
-                    },
-                    "roles": {
+                  },
+                  "roles": {
                     "focal": {
-                        "categories": [],
-                        "min": 0,
-                        "max": 0
+                      "categories": [],
+                      "min": 0,
+                      "max": 0
                     },
                     "semi": {
-                        "categories": [],
-                        "min": 0,
-                        "max": 0
+                      "categories": [],
+                      "min": 0,
+                      "max": 0
                     },
                     "filler": {
-                        "categories": [],
-                        "min": 0,
-                        "max": 0
+                      "categories": [],
+                      "min": 0,
+                      "max": 0
                     },
                     "greenery": {
-                        "categories": [],
-                        "min": 0,
-                        "max": 0
+                      "categories": [],
+                      "min": 0,
+                      "max": 0
                     }
-                    },
-                    "wrappingPaper": {
+                  },
+                  "wrappingPaper": {
                     "colors": [],
                     "patterns": []
-                    }
+                  }
                 }
-            """;
+                """;
         }
 
         internal static string BuildImagePrompt(BouquetDetails bouquetDetails)

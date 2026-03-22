@@ -12,12 +12,16 @@ namespace BLL.Services.OpenAi.OpenAiClient
         public OpenAiClient(HttpClient httpClient)
         {
             _httpClient = httpClient;
+            ConfigureClient();
         }
         public async Task<string> GenerateTextAsync(string prompt, string responseFormat, CancellationToken cancellationToken = default)
         {
             var payload = new StringContent(CreatePayloadForText(prompt, responseFormat), Encoding.UTF8, "application/json");
             var result = await _httpClient.PostAsync("/v1/chat/completions", payload);
-            var response = ParseResponseForText(await result.Content.ReadAsStringAsync());
+            var response = ParseResponseForText(await result.Content.ReadAsStringAsync())
+                .Replace("```json", "")
+                .Replace("```", "")
+                .Trim();
             return response;
         }
 
