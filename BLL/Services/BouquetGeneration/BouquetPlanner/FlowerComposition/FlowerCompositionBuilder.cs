@@ -3,7 +3,7 @@ using BLL.Services.OpenAi.Dto;
 
 namespace BLL.Services.BouquetGeneration.BouquetPlanner.FlowerComposition
 {
-    internal sealed class FlowerCompositionBuilder : IFlowerCompositionBuilder
+    public sealed class FlowerCompositionBuilder : IFlowerCompositionBuilder
     {
         public List<Dto.FlowerComposition> BuildFlowersComposition(List<FlowerWithRole> flowersWithRole, GptStyleRecommendation aiStyleRecommendation, decimal totalBudget)
         {

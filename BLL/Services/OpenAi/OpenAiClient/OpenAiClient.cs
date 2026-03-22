@@ -5,7 +5,7 @@ using System.Text.Json.Nodes;
 
 namespace BLL.Services.OpenAi.OpenAiClient
 {
-    internal sealed class OpenAiClient : IOpenAiClient
+    public sealed class OpenAiClient : IOpenAiClient
     {
         private readonly HttpClient _httpClient;
 

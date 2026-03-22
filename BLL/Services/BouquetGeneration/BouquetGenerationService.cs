@@ -5,21 +5,15 @@ using BLL.Services.OpenAi;
 
 namespace BLL.Services.BouquetGeneration
 {
-    public class BouquetGenerationService : IBouquetGenerationService
+    public class BouquetGenerationService(IBouquetPlanner bouquetPlanner, IOpenAIService openAIService) : IBouquetGenerationService
     {
-        private readonly IBouquetPlanner _bouquetPlanner;
-        private readonly IOpenAIService _openAIService;
-        public BouquetGenerationService(IBouquetPlanner bouquetPlanner, IOpenAIService openAIService)
+        public async Task<GenerateBouquetResponse> GenerateBouquetAsync(GenerateBouquetDescriptor descriptor, CancellationToken cancellationToken = default)
         {
-            _bouquetPlanner = bouquetPlanner;
-            _openAIService = openAIService;
-        }
+            var completedBouquetInfo = await bouquetPlanner.BuildPlanAsync(descriptor, cancellationToken);
 
-        public Task<GenerateBouquetResponse> GenerateBouquetAsync(GenerateBouquetDescriptor descriptor, CancellationToken cancellationToken = default)
-        {
-            var completedBouquetInfo = _bouquetPlanner.BuildPlanAsync(descriptor, cancellationToken);
+            var generatedBouquetImage = await openAIService.GenerateBouquetImageAsync(completedBouquetInfo, cancellationToken);
 
-            var generatedBouquetImage = _openAIService.GenerateBouquetImageAsync(completedBouquetInfo.Result, cancellationToken);
+            return new GenerateBouquetResponse(generatedBouquetImage, completedBouquetInfo);
         }
     }
 }

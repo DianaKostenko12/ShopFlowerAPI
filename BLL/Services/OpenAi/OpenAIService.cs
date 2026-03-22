@@ -7,7 +7,7 @@ using System.Text.Json;
 
 namespace BLL.Services.OpenAi
 {
-    internal class OpenAIService : IOpenAIService
+    public class OpenAIService : IOpenAIService
     {
         private readonly IOpenAiClient _openAiClient;
         public OpenAIService(IOpenAiClient openAiClient)

@@ -9,7 +9,7 @@ using DAL.Models;
 
 namespace BLL.Services.BouquetGeneration.BouquetPlanner
 {
-    internal class BouquetPlanner : IBouquetPlanner
+    public class BouquetPlanner : IBouquetPlanner
     {
         private readonly IOpenAIService _openAIService;
         private readonly IFlowerService _flowerService;
@@ -42,7 +42,7 @@ namespace BLL.Services.BouquetGeneration.BouquetPlanner
 
             var completedComposition = _flowerCompositionBuilder.BuildFlowersComposition(flowersWithRole, aiStyleAdvice, descriptor.Budget);
 
-            return new BouquetDetails(completedComposition, selectedWrappingPaper, descriptor.Shape);
+            return new BouquetDetails(aiStyleAdvice.BouquetName, completedComposition, selectedWrappingPaper, descriptor.Shape);
         }
 
         private double CalculateHarmony(

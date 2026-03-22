@@ -15,26 +15,57 @@ namespace BLL.Services.OpenAi.Utils
                 You are a florist assistant.
 
                 Style: {{bouquet.Style}}
-                Color palette: {{bouquet.Color}}
+                Shape: {{bouquet.Shape}}
+                Color preference: {{bouquet.Color}}
 
                 Task:
-                Suggest suitable flower CATEGORIES for this bouquet style and create a fitting bouquet NAME.
+                Generate bouquet composition details.
 
                 Rules:
-                - Use only generic categories (e.g. Rose, Peony, Tulip, Eustoma, Greenery).
-                - Max 2 focal categories.
-                - Max 2 filler categories.
-                - Max 1 greenery category.
-                - Create a short, elegant, and creative bouquet name (max 3–5 words).
-                - The name should match the style and color palette.
-                - Do NOT mention specific products or prices.
+                - Generate a creative bouquet name (3–5 words).
+                - Palette must include harmonious primary and accent colors.
+                - Use only generic flower categories (e.g. Rose, Peony, Tulip, Eustoma, Greenery).
+                - Focal: max 2 categories.
+                - Semi: max 2 categories.
+                - Filler: max 2 categories.
+                - Greenery: max 1 category.
+                - Min/Max should be realistic (e.g. 1–5 stems depending on role).
+                - Wrapping paper should match palette and style.
+                - Do NOT include Style or Shape in response.
 
                 Return STRICT JSON in this format:
                 {
-                  "name": "",
-                  "focalCategories": [],
-                  "fillerCategories": [],
-                  "greeneryCategories": []
+                    "bouquetName": "",
+                    "palette": {
+                    "primary": [],
+                    "accent": []
+                    },
+                    "roles": {
+                    "focal": {
+                        "categories": [],
+                        "min": 0,
+                        "max": 0
+                    },
+                    "semi": {
+                        "categories": [],
+                        "min": 0,
+                        "max": 0
+                    },
+                    "filler": {
+                        "categories": [],
+                        "min": 0,
+                        "max": 0
+                    },
+                    "greenery": {
+                        "categories": [],
+                        "min": 0,
+                        "max": 0
+                    }
+                    },
+                    "wrappingPaper": {
+                    "colors": [],
+                    "patterns": []
+                    }
                 }
             """;
         }

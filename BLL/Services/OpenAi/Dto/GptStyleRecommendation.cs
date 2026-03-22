@@ -2,8 +2,7 @@
 {
     public sealed record GptStyleRecommendation
     (
-        string Style,                   
-        string Shape,                   
+        string BouquetName,
         ColorPalette Palette,           
         FlowerRoles Roles,              
         WrappingRecommendation WrappingPaper

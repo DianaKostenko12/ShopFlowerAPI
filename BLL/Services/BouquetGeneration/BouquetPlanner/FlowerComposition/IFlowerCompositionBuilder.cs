@@ -3,7 +3,7 @@ using BLL.Services.OpenAi.Dto;
 
 namespace BLL.Services.BouquetGeneration.BouquetPlanner.FlowerComposition
 {
-    internal interface IFlowerCompositionBuilder
+    public interface IFlowerCompositionBuilder
     {
         List<Dto.FlowerComposition> BuildFlowersComposition(
            List<FlowerWithRole> filteredFlowers,
