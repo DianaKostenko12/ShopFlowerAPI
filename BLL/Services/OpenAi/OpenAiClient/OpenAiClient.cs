@@ -27,7 +27,7 @@ namespace BLL.Services.OpenAi.OpenAiClient
 
         public async Task<byte[]> GenerateImageAsync(string prompt, string responseFormat, CancellationToken cancellation = default)
         {
-            var payload = new StringContent(CreatePayloadForImage(prompt, responseFormat), Encoding.UTF8, "application/json");
+            var payload = new StringContent(CreatePayloadForImage(prompt), Encoding.UTF8, "application/json");
             var result = await _httpClient.PostAsync("/v1/images/generations", payload);
             var response = ParseResponseForImage(await result.Content.ReadAsStringAsync());
             return response;
@@ -85,30 +85,13 @@ namespace BLL.Services.OpenAi.OpenAiClient
             return JsonSerializer.Serialize(request);
         }
 
-        private string CreatePayloadForImage(string prompt, string responseFormat)
+        private string CreatePayloadForImage(string prompt)
         {
-            var request = new ImageGenerationPayload
+            var request = new
             {
-                Model = OpenAiConstants.Model,
-                Messages =
-                [
-                    new()
-                    {
-                        Content =
-                        [
-                            new MessageContent
-                            {
-                                Text = prompt
-                            }
-                        ]
-                    }
-                ],
-                ResponseFormat = new()
-                {
-                    Type = responseFormat
-                },
-                NumberOfImages = 1,
-                Size = "1024x1024",
+                model = "gpt-image-1",
+                prompt = prompt,
+                size = "1024x1024",
             };
 
             return JsonSerializer.Serialize(request);

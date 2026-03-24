@@ -99,14 +99,14 @@ namespace BLL.Services.OpenAi.Utils
                 Bouquet shape:
                 {ResolveShape(bouquetDetails.Shape)}
 
-                Bouquet composition:
+                Bouquet composition (Exact counts and items):
                 {BuildFlowerList(bouquetDetails.FlowerComposition)}
 
                 Arrangement rules:
                 - Focal flowers are placed in the center and visually dominate.
                 - Semi flowers surround the focal flowers.
                 - Filler flowers fill gaps and add softness.
-                - Greenery frames the bouquet and adds volume.
+                {(HasGreenery(bouquetDetails.FlowerComposition) ? "- Greenery frames the bouquet and adds volume." : "- No greenery or leaves should be included.")}
 
                 Wrapping:
                 {BuildWrapping(bouquetDetails.WrappingPaper)}
@@ -114,6 +114,7 @@ namespace BLL.Services.OpenAi.Utils
                 Style and rendering:
                 - Natural florist style
                 - Balanced and harmonious composition
+                - Each flower must be a distinct, individual object (to help with counting)
                 - All flowers clearly visible and identifiable
                 - Soft natural daylight
                 - Neutral background
@@ -169,6 +170,16 @@ namespace BLL.Services.OpenAi.Utils
             return $"Wrapped in {wrapping.Pattern?.ToLowerInvariant() ?? "plain"} " +
                    $"{wrapping.Color?.ToLowerInvariant() ?? "neutral"} " +
                    $"{wrapping.Type?.ToLowerInvariant() ?? "paper"}.";
+        }
+
+        private static bool HasGreenery(IEnumerable<FlowerComposition> flowers)
+        {
+            if (flowers == null)
+            {
+                return false;
+            }
+
+            return flowers.Any(f => f.Role == RolesConstants.GreeneryCategory);
         }
     }
 }
