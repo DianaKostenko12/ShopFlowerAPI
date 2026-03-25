@@ -22,71 +22,120 @@ namespace BLL.Services.OpenAi.Utils
                 Budget: {{bouquet.Budget}}
 
                 Task:
-                Generate bouquet composition details.
+                Згенерувати деталі композиції букета.
 
-                STRICT RULES:
-                - Return ONLY valid JSON. No explanations, no markdown, no ``` blocks.
-                - Do not include any text before or after JSON.
-                - All fields are required.
-                - Use camelCase exactly as in schema.
-                - Numbers must be integers.
+                STRICT OUTPUT FORMAT:
+
+                Output MUST be valid JSON.
+                Output MUST start with { and end with }.
+                Do NOT include any text before or after JSON.
+                Do NOT use markdown or ``` blocks.
+                Do NOT add comments.
+                Do NOT add trailing commas.
+                All fields are required.
+
+                CRITICAL STRUCTURE RULE:
+
+                JSON keys MUST remain EXACTLY as defined in the schema.
+                DO NOT translate keys.
+                DO NOT rename keys.
+                DO NOT remove keys.
+                DO NOT add new keys.
+
+                CRITICAL LANGUAGE RULE:
+
+                JSON keys → English ONLY.
+                JSON values → Ukrainian ONLY.
+                ANY English word inside values is FORBIDDEN.
+                If any value is not Ukrainian → response is INVALID.
+
+                OUTPUT LANGUAGE RULES:
+
+                bouquetName → Ukrainian only.
+                palette colors → Ukrainian only.
+                flower categories → Ukrainian only.
+                wrappingPaper.colors → Ukrainian only.
+                wrappingPaper.patterns → Ukrainian only.
 
                 COLOR RULES:
-                - Use ONLY simple base colors (one word).
-                - Do NOT use adjectives like "light", "dark", "soft", "pale", "sky", etc.
-                - Examples of valid colors: red, pink, blue, white, yellow, green, purple, beige.
+
+                Use ONLY one-word base colors.
+                Allowed colors ONLY:
+                червоний, рожевий, синій, білий, жовтий, зелений, фіолетовий, бежевий
+                Any other color is FORBIDDEN.
+                No оттенки or descriptive adjectives.
+
+                FLOWER CATEGORY RULES:
+                Any flower and greenery categories are allowed in Ukrainian.
+                Example flower categories: Троянда, Півонія, Тюльпан, Еустома, Гортензія, Ранункулюс, Гіпсофіла, Лілія, Орхідея, Хризантема, Айстра, Соняшник.
+                Example greenery categories: Зелень, Евкаліпт, Аспарагус, Папороть, Рускус, Сальвія, Лаванда.
+                For focal, semi, and filler – select categories logically according to the role.
+                For greenery – you can specify 1–3 greenery categories depending on the budget.
 
                 BUDGET RULES:
-                - The bouquet must realistically fit within the given budget.
-                - Low budget → fewer flowers, simpler composition.
-                - Medium budget → balanced composition.
-                - High budget → richer composition with more focal flowers.
-                - Do NOT generate excessive quantities if budget is limited.
-                - Adjust min/max values according to budget.
+
+                Low budget → small numbers.
+                Medium budget → balanced numbers.
+                High budget → larger numbers.
+                Numbers MUST be realistic.
+                Avoid excessive quantities.
 
                 Bouquet rules:
-                - Generate a creative bouquet name (3–5 words).
-                - Palette must include 2–3 primary and 1–2 accent colors.
-                - Use only generic flower categories (Rose, Peony, Tulip, Eustoma, Hydrangea, Ranunculus, Gypsophila, Greenery).
-                - Focal: max 2 categories.
-                - Semi: max 2 categories.
-                - Filler: max 2 categories.
-                - Greenery: exactly 1 category.
-                - Wrapping paper must match palette and style.
 
-                Return STRICT JSON in this format:
+                bouquetName: 3–5 words, Ukrainian.
+                palette: 2–3 primary, 1–2 accent.
+                Focal: max 2 categories.
+                Semi: max 2 categories.
+                Filler: max 2 categories.
+                Greenery: 1-3 categories of greenery.
+                wrappingPaper.colors MUST be chosen from palette.
+                wrappingPaper.patterns MUST be simple Ukrainian words:
+                (однотонний, лінії, крапки, без візерунка)
+
+                SELF-VALIDATION (MANDATORY):
+                Before returning result, check:
+
+                Is JSON valid?
+                Are ALL keys unchanged?
+                Are ALL values Ukrainian?
+                Are colors from allowed list only?
+                Are flower categories from allowed list only?
+
+                If ANY rule is violated → regenerate internally until valid.
+
+                Return JSON ONLY in this structure:
                 {
-                  "bouquetName": "",
-                  "palette": {
-                    "primary": [],
-                    "accent": []
-                  },
-                  "roles": {
-                    "focal": {
-                      "categories": [],
-                      "min": 0,
-                      "max": 0
-                    },
-                    "semi": {
-                      "categories": [],
-                      "min": 0,
-                      "max": 0
-                    },
-                    "filler": {
-                      "categories": [],
-                      "min": 0,
-                      "max": 0
-                    },
-                    "greenery": {
-                      "categories": [],
-                      "min": 0,
-                      "max": 0
-                    }
-                  },
-                  "wrappingPaper": {
-                    "colors": [],
-                    "patterns": []
-                  }
+                "bouquetName": "",
+                "palette": {
+                "primary": [],
+                "accent": []
+                },
+                "roles": {
+                "focal": {
+                "categories": [],
+                "min": 0,
+                "max": 0
+                },
+                "semi": {
+                "categories": [],
+                "min": 0,
+                "max": 0
+                },
+                "filler": {
+                "categories": [],
+                "min": 0,
+                "max": 0
+                },
+                "greenery": {
+                "categories": [],
+                "min": 0,
+                "max": 0
+                }
+                },
+                "wrappingPaper": {
+                "colors": [],
+                "patterns": []
+                }
                 }
                 """;
         }
@@ -126,10 +175,10 @@ namespace BLL.Services.OpenAi.Utils
         {
             return shape?.ToLowerInvariant() switch
             {
-                "round" => "Round bouquet with a balanced, symmetrical composition.",
-                "elongated" => "Elongated vertical bouquet with elegant height.",
-                "horizontal" => "Horizontal bouquet with wide, low-profile composition.",
-                "asymmetrical" => "Asymmetrical bouquet with a natural, organic flow.",
+                "кругла" => "Round bouquet with a balanced, symmetrical composition.",
+                "подовжена" => "Elongated vertical bouquet with elegant height.",
+                "горизонтальна" => "Horizontal bouquet with wide, low-profile composition.",
+                "асиметрична" => "Asymmetrical bouquet with a natural, organic flow.",
                 _ => "Round bouquet with a balanced, symmetrical composition."
             };
         }

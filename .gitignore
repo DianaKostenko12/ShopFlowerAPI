@@ -362,3 +362,4 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /FlowerShopApi/UploadedFiles
+/BLL/Services/OpenAi/OpenAiClient/OpenAiConstants.cs
