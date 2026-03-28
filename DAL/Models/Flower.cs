@@ -10,6 +10,8 @@
         public string Color { get; set; }
         public string Category { get; set; }
         public int HeadSizeCm { get; set; }
+        public double StemThicknessMm { get; set; }
+        public bool Flexibility { get; set; }
         public bool IsDeleted { get; set; }
         public ICollection<BouquetFlower> BouquetsFlowers { get; set; }
     }

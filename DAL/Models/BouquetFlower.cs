@@ -7,5 +7,6 @@
         public int FlowerCount { get; set; }
         public Flower Flower { get; set; }
         public Bouquet Bouquet { get; set; }
+        public string Role { get; set; }
     }
 }

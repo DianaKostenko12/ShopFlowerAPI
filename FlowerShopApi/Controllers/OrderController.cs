@@ -70,7 +70,9 @@ namespace FlowerShopApi.Controllers
             {
                 int? userId = _httpContextAccessor.HttpContext.User.GetUserId();
                 await _orderService.AddOrderAsync(descriptor, userId.Value);
-                return CreatedAtAction(nameof(GetOrders), new { userId = userId }, descriptor);
+
+                
+                return CreatedAtAction(nameof(GetOrders), new { userId }, descriptor);
             }
             catch (Exception ex)
             {

@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="DTOs\BouquetAssembly\" />
     <Folder Include="UploadedFiles\" />
   </ItemGroup>
 
