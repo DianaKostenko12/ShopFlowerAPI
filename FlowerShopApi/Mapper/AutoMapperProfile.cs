@@ -3,6 +3,7 @@ using BLL.Services.Auth.Descriptors;
 using BLL.Services.Bouquets;
 using BLL.Services.Flowers.Descriptors;
 using DAL.Models;
+using DAL.Models.Flowers;
 using DAL.Models.Orders;
 using FlowerShopApi.DTOs;
 using FlowerShopApi.DTOs.Bouquets;

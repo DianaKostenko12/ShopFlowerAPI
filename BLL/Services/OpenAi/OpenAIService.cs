@@ -21,20 +21,11 @@ namespace BLL.Services.OpenAi
 
             var response = await _openAiClient.GenerateTextAsync(prompt, "text");
 
-            try
+            return JsonSerializer.Deserialize<GptStyleRecommendation>(response,
+            new JsonSerializerOptions
             {
-                return JsonSerializer.Deserialize<GptStyleRecommendation>(response,
-                new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-            
+                PropertyNameCaseInsensitive = true
+            });
         }
 
         public async Task<byte[]> GenerateBouquetImageAsync(BouquetDetails bouquetDetails, CancellationToken cancellationToken = default)

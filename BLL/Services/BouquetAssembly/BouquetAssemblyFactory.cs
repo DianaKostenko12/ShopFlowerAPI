@@ -1,4 +1,6 @@
-﻿namespace BLL.Services.BouquetAssembly
+﻿using BLL.Services.BouquetAssembly.BouquetAssemblyStrategy;
+
+namespace BLL.Services.BouquetAssembly
 {
     public static class BouquetAssemblyFactory
     {

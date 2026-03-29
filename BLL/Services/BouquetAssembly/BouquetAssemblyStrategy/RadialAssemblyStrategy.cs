@@ -2,7 +2,7 @@
 using BLL.Services.BouquetAssembly.Responses;
 using BLL.Services.BouquetGeneration.BouquetPlanner;
 
-namespace BLL.Services.BouquetAssembly
+namespace BLL.Services.BouquetAssembly.BouquetAssemblyStrategy
 {
     public class RadialAssemblyStrategy : IBouquetAssemblyStrategy
     {
@@ -18,15 +18,15 @@ namespace BLL.Services.BouquetAssembly
                 {
                     double cutLength = ResolveLength(item.Role);
 
-                    totalWeight += (item.HeadSizeCm * 1.5) + (cutLength * 0.4);
+                    totalWeight += item.HeadSizeCm * 1.5 + cutLength * 0.4;
 
                     if (item.Role == RolesConstants.FocalCategory)
                     {
-                        currentRadius += (item.HeadSizeCm * 0.05);
+                        currentRadius += item.HeadSizeCm * 0.05;
                     }
                     else
                     {
-                        currentRadius += (item.HeadSizeCm * 0.12);
+                        currentRadius += item.HeadSizeCm * 0.12;
                     }
 
                     if (cutLength > maxFinalHeight)
@@ -39,7 +39,7 @@ namespace BLL.Services.BouquetAssembly
             return new AssemblyResult
             {
                 IsAssembled = true,
-                CompletionTime = new DateTime(12,02,2026),
+                CompletionTime = new DateTime(12, 02, 2026),
                 FinalHeightCm = maxFinalHeight,
                 FinalWidthCm = Math.Round(currentRadius * 2, 1),
                 AssemblyType = "Radial"

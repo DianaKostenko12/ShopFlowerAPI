@@ -5,7 +5,7 @@ using BLL.Services.Flowers;
 using BLL.Services.OpenAi;
 using BLL.Services.OpenAi.Dto;
 using BLL.Services.WrappingPapers;
-using DAL.Models;
+using DAL.Models.Flowers;
 
 namespace BLL.Services.BouquetGeneration.BouquetPlanner
 {

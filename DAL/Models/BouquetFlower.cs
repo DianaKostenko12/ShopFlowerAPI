@@ -1,4 +1,6 @@
-﻿namespace DAL.Models
+﻿using DAL.Models.Flowers;
+
+namespace DAL.Models
 {
     public class BouquetFlower
     {

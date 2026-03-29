@@ -2,7 +2,7 @@
 using BLL.Services.FileStorage;
 using BLL.Services.Flowers.Descriptors;
 using DAL.Data.UnitOfWork;
-using DAL.Models;
+using DAL.Models.Flowers;
 
 namespace BLL.Services.Flowers
 {

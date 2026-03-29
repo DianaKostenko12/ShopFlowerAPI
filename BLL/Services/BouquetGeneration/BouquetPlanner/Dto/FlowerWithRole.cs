@@ -1,4 +1,4 @@
-﻿using DAL.Models;
+﻿using DAL.Models.Flowers;
 
 namespace BLL.Services.BouquetGeneration.BouquetPlanner.Dto
 {

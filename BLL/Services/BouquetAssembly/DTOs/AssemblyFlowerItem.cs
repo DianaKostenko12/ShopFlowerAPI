@@ -1,4 +1,6 @@
-﻿namespace BLL.Services.BouquetAssembly.DTOs
+﻿using DAL.Models.Flowers;
+
+namespace BLL.Services.BouquetAssembly.DTOs
 {
     public record AssemblyFlowerItem
     (
@@ -7,7 +9,7 @@
         int Quantity,
         int HeadSizeCm,
         double StemThicknessMm,
-        bool Flexibility,
+        StemType StemKind,
         string Role
     );
 }

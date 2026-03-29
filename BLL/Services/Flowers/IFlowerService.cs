@@ -1,5 +1,5 @@
 ﻿using BLL.Services.Flowers.Descriptors;
-using DAL.Models;
+using DAL.Models.Flowers;
 
 namespace BLL.Services.Flowers
 {
