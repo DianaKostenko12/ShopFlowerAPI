@@ -1,9 +1,10 @@
 ﻿using BLL.Services.BouquetAssembly.DTOs;
+using BLL.Services.BouquetAssembly.FlowersProcessingStep.DTOs;
 
 namespace BLL.Services.BouquetAssembly.FlowerProcessingStep
 {
     public interface IFlowerProcessingStep
     {
-        AssemblyFlowerItem ProcessFlower(AssemblyFlowerItem flowerItem);
+        ProcessedFlower ProcessFlower(AssemblyFlowerItem flowerItem);
     }
 }

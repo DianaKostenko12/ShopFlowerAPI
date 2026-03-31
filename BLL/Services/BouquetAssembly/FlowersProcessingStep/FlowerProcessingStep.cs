@@ -5,15 +5,15 @@ namespace BLL.Services.BouquetAssembly.FlowersProcessingStep
 {
     public class FlowerProcessingStep : IFlowerProcessingStep
     {
-        public AssemblyFlowerItem ProcessFlower(AssemblyFlowerItem flowerItem)
+        public ProcessedFlower ProcessFlower(AssemblyFlowerItem flowerItem)
         {
             var flowerItemStemProfile = StemPhysicsProvider.GetProfile(flowerItem.StemKind);
             var actualGripForce = CalculateGripForce(flowerItem, flowerItemStemProfile);
             var flowerItemAfterCutting = Cut(flowerItem, actualGripForce, flowerItemStemProfile);
-            var flowerItemAfterStripping = Strip(flowerItemAfterCutting, flowerItemStemProfile);
+            return Strip(flowerItemAfterCutting, flowerItemStemProfile);
         }
 
-        public double CalculateGripForce(AssemblyFlowerItem item, StemProfile flowerStemProfile)
+        private double CalculateGripForce(AssemblyFlowerItem item, StemProfile flowerStemProfile)
         {
             var weightGr = (item.HeadSizeCm * item.StemThicknessMm) + (FlowerProcessingConstants.DefaultSupplierLengthCm * item.StemThicknessMm * flowerStemProfile.WeightFactor)/10;
 
@@ -38,7 +38,7 @@ namespace BLL.Services.BouquetAssembly.FlowersProcessingStep
             return Math.Round(finalForce, 2); // Повертаємо силу в Ньютонах (N)
         }
 
-        public ProcessedFlower Cut(AssemblyFlowerItem flowerItem, double gripForce, StemProfile flowerStemProfile)
+        private ProcessedFlower Cut(AssemblyFlowerItem flowerItem, double gripForce, StemProfile flowerStemProfile)
         {
             double cuttingResistance = (flowerItem.StemThicknessMm * flowerStemProfile.WeightFactor) * 0.5;
 
@@ -69,7 +69,7 @@ namespace BLL.Services.BouquetAssembly.FlowersProcessingStep
             );
         }
 
-        public ProcessedFlower Strip(ProcessedFlower processedFlower, StemProfile flowerStemProfile)
+        private ProcessedFlower Strip(ProcessedFlower processedFlower, StemProfile flowerStemProfile)
         {
             // 2. РОЗРАХУНОК ВТРАТИ МАСИ (Фізика процесу)
             // Рахуємо масу ділянки стебла довжиною 25 см:
