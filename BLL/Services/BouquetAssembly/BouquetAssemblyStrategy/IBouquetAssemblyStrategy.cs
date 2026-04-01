@@ -1,6 +1,5 @@
-﻿using BLL.Services.BouquetAssembly.Descriptors;
+﻿using BLL.Services.BouquetAssembly.DTOs;
 using BLL.Services.BouquetAssembly.FlowersProcessingStep.DTOs;
-using BLL.Services.BouquetAssembly.Responses;
 
 namespace BLL.Services.BouquetAssembly.BouquetAssemblyStrategy
 {

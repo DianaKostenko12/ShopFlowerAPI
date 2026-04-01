@@ -8,7 +8,7 @@ namespace BLL.Services.BouquetAssembly
         {
             return shape?.ToLowerInvariant() switch
             {
-                "кругла" => new RoundAssemblyStrategy(),
+                "кругла" => new RadialAssemblyStrategy(),
                 "подовжена" => new ElongatedAssemblyStrategy(),
                 "горизонтальна" => new HorizontalAssemblyStrategy(),
                 "асиметрична" => new AsymmetricalAssemblyStrategy(),
