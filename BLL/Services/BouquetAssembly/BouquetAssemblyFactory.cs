@@ -10,9 +10,8 @@ namespace BLL.Services.BouquetAssembly
             {
                 "кругла" => new RadialAssemblyStrategy(),
                 "подовжена" => new ElongatedAssemblyStrategy(),
-                "горизонтальна" => new HorizontalAssemblyStrategy(),
                 "асиметрична" => new AsymmetricalAssemblyStrategy(),
-                _ => new RoundAssemblyStrategy() // Дефолт
+                _ => new RadialAssemblyStrategy()
             };
         }
     }

@@ -1,4 +1,6 @@
-﻿namespace BLL.Services.BouquetAssembly.DTOs
+﻿using BLL.Services.BouquetAssembly.WrappingStep.DTOs;
+
+namespace BLL.Services.BouquetAssembly.DTOs
 {
     public record AssemblyResult
     (
@@ -6,6 +8,7 @@
         DateTime CompletionTime,
         string AssemblyType,
         double FinalWidthCm,
-        List<FlowerCoordinate> Coordinates
+        List<FlowerCoordinate> Coordinates,
+        WrappingResult Wrapping
     );
 }

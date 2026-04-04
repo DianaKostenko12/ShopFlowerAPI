@@ -5,7 +5,7 @@ namespace BLL.Services.BouquetAssembly.BouquetAssemblyStrategy
 {
     public class ElongatedAssemblyStrategy : IBouquetAssemblyStrategy
     {
-        public AssemblyResult AssembleBouquet(List<ProcessedFlower> processedFlowersForAssembly)
+        public LayoutResult AssembleBouquet(List<ProcessedFlower> processedFlowersForAssembly)
         {
             var layoutCoordinates = new List<FlowerCoordinate>();
 
@@ -49,7 +49,7 @@ namespace BLL.Services.BouquetAssembly.BouquetAssemblyStrategy
             // Потім продовжуємо нарощувати ці ж самі дуги, але вже міксом інших квітів
             BuildCrescentLayers(mixedQueue, ref currentRadiusX, ref currentRadiusY, layoutCoordinates);
 
-            return new AssemblyResult(true, DateTime.Now, "Crescent/Elongated", Math.Round(currentRadiusX * 2, 1), layoutCoordinates);
+            return new LayoutResult(true, DateTime.Now, "Crescent/Elongated", Math.Round(currentRadiusX * 2, 1), layoutCoordinates);
         }
 
         private void BuildCrescentLayers(Queue<ProcessedFlower> queue, ref double currentRadiusX, ref double currentRadiusY, List<FlowerCoordinate> layout)
@@ -75,8 +75,6 @@ namespace BLL.Services.BouquetAssembly.BouquetAssemblyStrategy
                 currentRadiusY += (nextRadius * 1.0);
             }
         }
-
-        // --- РОЗРАХУНОК КООРДИНАТ ДУГИ ---
 
         private void CalculateCrescentLayerPositions(List<ProcessedFlower> layerFlowers, double ellipseWidthRadius, double ellipseDepthRadius, List<FlowerCoordinate> bouquetLayout)
         {

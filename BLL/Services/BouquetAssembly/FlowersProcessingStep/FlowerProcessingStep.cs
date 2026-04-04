@@ -3,7 +3,7 @@ using BLL.Services.BouquetAssembly.FlowerProcessingStep;
 using BLL.Services.BouquetAssembly.FlowersProcessingStep.DTOs;
 namespace BLL.Services.BouquetAssembly.FlowersProcessingStep
 {
-    public class FlowerProcessingStep : IFlowerProcessingStep
+    public class FlowerProcessingStep : IFlowerProcessingStep  
     {
         public ProcessedFlower ProcessFlower(AssemblyFlowerItem flowerItem)
         {

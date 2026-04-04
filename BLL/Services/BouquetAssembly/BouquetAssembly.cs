@@ -2,16 +2,20 @@
 using BLL.Services.BouquetAssembly.DTOs;
 using BLL.Services.BouquetAssembly.FlowerProcessingStep;
 using BLL.Services.BouquetAssembly.FlowersProcessingStep.DTOs;
-using BLL.Services.BouquetAssembly.Responses;
+using BLL.Services.BouquetAssembly.WrappingStep;
+using AssemblyResult = BLL.Services.BouquetAssembly.DTOs.AssemblyResult;
 
 namespace BLL.Services.BouquetAssembly
 {
     public class BouquetAssembly : IBouquetAssembly
     {
         private readonly IFlowerProcessingStep _flowerProcessingStep;
-        public BouquetAssembly(IFlowerProcessingStep flowerProcessingStep)
+        private readonly IBouquetWrappingStep _bouquetWrappingStep;
+
+        public BouquetAssembly(IFlowerProcessingStep flowerProcessingStep, IBouquetWrappingStep bouquetWrappingStep)
         {
             _flowerProcessingStep = flowerProcessingStep;
+            _bouquetWrappingStep = bouquetWrappingStep;
         }
         public AssemblyResult ExecuteAssembly(AssemblyPlanDescriptor plan)
         {
@@ -38,17 +42,18 @@ namespace BLL.Services.BouquetAssembly
             var shapeBuilder = BouquetAssemblyFactory.GetStrategy(plan.Shape);
             var assembledBouquet = shapeBuilder.AssembleBouquet(processedFlowers);
 
-            // ЕТАП 4: Формування результату
-            return new AssemblyResult
-            {
-                IsAssembled = true,
-                CompletionTime = DateTime.Now,
-                FinalWidthCm = layoutResult.FinalWidthCm,
-                FinalHeightCm = 40.0, // Наша константа
-                AssemblyType = plan.Shape,
-                // Сюди можна додати розраховані координати для візуалізації
-                FlowerCoordinates = layoutResult.Coordinates
-            };
+            // ЕТАП 4: Обгортання букета папером та фіксація стрічкою
+            var wrappingResult = _bouquetWrappingStep.WrapBouquet(plan.WrappingPaperId, assembledBouquet.FinalWidthCm);
+
+            // ЕТАП 5: Формування результату
+            return new AssemblyResult(
+                assembledBouquet.IsAssembled,
+                assembledBouquet.CompletionTime,
+                plan.Shape,
+                assembledBouquet.FinalWidthCm,
+                assembledBouquet.Coordinates,
+                wrappingResult
+            );
         }
 
         private IEnumerable<AssemblyFlowerItem> SortFlowersForAssembly(IEnumerable<AssemblyFlowerItem> flowers)

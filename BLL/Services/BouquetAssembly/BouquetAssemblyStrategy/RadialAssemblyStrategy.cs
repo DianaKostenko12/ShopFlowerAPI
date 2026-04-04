@@ -1,12 +1,11 @@
 ﻿using BLL.Services.BouquetAssembly.DTOs;
 using BLL.Services.BouquetAssembly.FlowersProcessingStep.DTOs;
-using AssemblyResult = BLL.Services.BouquetAssembly.DTOs.AssemblyResult;
 
 namespace BLL.Services.BouquetAssembly.BouquetAssemblyStrategy
 {
     public class RadialAssemblyStrategy : IBouquetAssemblyStrategy
     {
-        public AssemblyResult AssembleBouquet(List<ProcessedFlower> processedFlowersForAssembly)
+        public LayoutResult AssembleBouquet(List<ProcessedFlower> processedFlowersForAssembly)
         {
             var layoutCoordinates = new List<FlowerCoordinate>();
 
@@ -54,7 +53,7 @@ namespace BLL.Services.BouquetAssembly.BouquetAssemblyStrategy
                 CalculateRingCoordinates(currentRingFlowers, currentRadius, layoutCoordinates);
             }
 
-            return new AssemblyResult(true, DateTime.Now, "Radial Exact Math", Math.Round(currentRadius * 2, 2), layoutCoordinates);
+            return new LayoutResult(true, DateTime.Now, "Radial Exact Math", Math.Round(currentRadius * 2, 2), layoutCoordinates);
         }
 
         private void CalculateRingCoordinates(List<ProcessedFlower> flowersToBuildRing, double radius, List<FlowerCoordinate> layout)

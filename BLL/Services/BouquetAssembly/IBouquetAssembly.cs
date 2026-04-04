@@ -1,5 +1,5 @@
 ﻿using BLL.Services.BouquetAssembly.Descriptors;
-using BLL.Services.BouquetAssembly.Responses;
+using BLL.Services.BouquetAssembly.DTOs;
 
 namespace BLL.Services.BouquetAssembly
 {

@@ -5,6 +5,6 @@ namespace BLL.Services.BouquetAssembly.BouquetAssemblyStrategy
 {
     public interface IBouquetAssemblyStrategy
     {
-        AssemblyResult AssembleBouquet(List<ProcessedFlower> processedFlowersForAssembly);
+        LayoutResult AssembleBouquet(List<ProcessedFlower> processedFlowersForAssembly);
     }
 }
