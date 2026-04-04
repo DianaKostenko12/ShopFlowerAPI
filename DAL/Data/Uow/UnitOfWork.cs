@@ -1,5 +1,7 @@
-﻿using DAL.Repositories.BouquetFlowers;
+using DAL.Repositories.BouquetFlowers;
 using DAL.Repositories.Bouquets;
+using DAL.Repositories.Categories;
+using DAL.Repositories.Colors;
 using DAL.Repositories.Flowers;
 using DAL.Repositories.OrderBouquets;
 using DAL.Repositories.Orders;
@@ -15,7 +17,10 @@ namespace DAL.Data.UnitOfWork
         private IOrderRepository _orderRepository;
         private IOrderBouquetRepository _orderBouquetRepository;
         private IBouquetFlowerRepository _bouquetFlowerRepository;
+        private ICategoryRepository _categoryRepository;
+        private IColorRepository _colorRepository;
         private IWrappingPaperRepository _wrappingPaperRepository;
+
         public UnitOfWork(DataContext context)
         {
             _context = context;
@@ -58,6 +63,22 @@ namespace DAL.Data.UnitOfWork
             get
             {
                 return _bouquetFlowerRepository ??= new BouquetFlowerRepository(_context);
+            }
+        }
+
+        public ICategoryRepository CategoryRepository
+        {
+            get
+            {
+                return _categoryRepository ??= new CategoryRepository(_context);
+            }
+        }
+
+        public IColorRepository ColorRepository
+        {
+            get
+            {
+                return _colorRepository ??= new ColorRepository(_context);
             }
         }
 

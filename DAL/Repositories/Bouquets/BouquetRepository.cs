@@ -4,12 +4,6 @@ using DAL.Models;
 using DAL.Repositories.Base;
 using DAL.Repositories.Flowers;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace DAL.Repositories.Bouquets
 {
     public class BouquetRepository : BaseRepository<Bouquet>, IBouquetRepository
@@ -41,6 +35,10 @@ namespace DAL.Repositories.Bouquets
                 .Include(b => b.User)
                 .Include(b => b.BouquetsFlowers)
                     .ThenInclude(bf => bf.Flower)
+                        .ThenInclude(f => f.Color)
+                .Include(b => b.BouquetsFlowers)
+                    .ThenInclude(bf => bf.Flower)
+                        .ThenInclude(f => f.Category)
                 .ToListAsync();
         }
 
@@ -50,6 +48,10 @@ namespace DAL.Repositories.Bouquets
                 .Where(b => b.IsDeleted == false)
                 .Include(b => b.BouquetsFlowers)
                 .ThenInclude(bf => bf.Flower)
+                    .ThenInclude(f => f.Color)
+                .Include(b => b.BouquetsFlowers)
+                .ThenInclude(bf => bf.Flower)
+                    .ThenInclude(f => f.Category)
                 .Where(f => f.IsDeleted == false)
                 .Include(b => b.User)
                 .AsQueryable();
@@ -73,6 +75,15 @@ namespace DAL.Repositories.Bouquets
         public async Task<Bouquet> GetBouquetByIdAsync(int id)
         {
            return await Sourse.Where(b => b.IsDeleted == false).FirstOrDefaultAsync(b => b.BouquetId == id);
+        }
+
+        public async Task<Bouquet> GetBouquetWithFlowersAsync(int bouquetId)
+        {
+            return await Sourse
+                .Where(b => !b.IsDeleted && b.BouquetId == bouquetId)
+                .Include(b => b.BouquetsFlowers)
+                    .ThenInclude(bf => bf.Flower)
+                .FirstOrDefaultAsync();
         }
     }
 }

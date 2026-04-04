@@ -1,13 +1,11 @@
-﻿using AutoMapper;
+using AutoMapper;
 using BLL.Services.Bouquets;
 using BLL.Services.Bouquets.Descriptors;
 using DAL.Filters;
-using DAL.Models;
 using FlowerShopApi.Common.Extensions;
 using FlowerShopApi.DTOs.Bouquets;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace FlowerShopApi.Controllers
 {
@@ -16,23 +14,42 @@ namespace FlowerShopApi.Controllers
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IBouquetService _bouquetService;
-        private readonly IMapper _mapper; 
+        private readonly IMapper _mapper;
+        private readonly IWebHostEnvironment _environment;
 
-        public BouquetController(IBouquetService bouquetService, IHttpContextAccessor httpContextAccessor, IMapper mapper)
+        public BouquetController(IBouquetService bouquetService, IHttpContextAccessor httpContextAccessor, IMapper mapper, IWebHostEnvironment environment)
         {
             _bouquetService = bouquetService;
             _httpContextAccessor = httpContextAccessor;
             _mapper = mapper;
+            _environment = environment;
         }
 
         [HttpPost, Authorize]
-        public async Task<IActionResult> AddBouquetAsync([FromForm] CreateBouquetDescriptor descriptor)
+        public async Task<IActionResult> AddBouquetAsync([FromForm] CreateBouquetRequest request)
         {
             try
             {
                 int? userId = _httpContextAccessor.HttpContext.User.GetUserId();
+                var descriptor = _mapper.Map<CreateBouquetDescriptor>(request);
                 await _bouquetService.AddBouquetAsync(descriptor, userId.Value);
                 return Ok(new { Message = "Bouquet added successfully." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
+        [HttpPost("ai"), Authorize]
+        public async Task<IActionResult> AddAIBouquetAsync([FromBody] CreateAIBouquetRequest request)
+        {
+            try
+            {
+                int? userId = _httpContextAccessor.HttpContext.User.GetUserId();
+                var descriptor = _mapper.Map<CreateBouquetDescriptor>(request);
+                await _bouquetService.AddBouquetAsync(descriptor, userId.Value);
+                return Ok(new { Message = "AI bouquet added successfully." });
             }
             catch (Exception ex)
             {
@@ -65,6 +82,45 @@ namespace FlowerShopApi.Controllers
             }
         }
 
+        [HttpGet("{id}/image")]
+        public async Task<IActionResult> GetBouquetImageAsync(int id)
+        {
+            var bouquet = await _bouquetService.GetBouquetByIdAsync(id);
+            if (bouquet == null)
+            {
+                return NotFound(new { Message = $"Bouquet with ID {id} was not found." });
+            }
+
+            if (bouquet.PhotoBytes != null && bouquet.PhotoBytes.Length > 0)
+            {
+                return File(bouquet.PhotoBytes, bouquet.PhotoContentType ?? "image/png");
+            }
+
+            if (!string.IsNullOrWhiteSpace(bouquet.PhotoFileName))
+            {
+                var filePath = Path.Combine(_environment.ContentRootPath, "UploadedFiles", bouquet.PhotoFileName);
+                if (!System.IO.File.Exists(filePath))
+                {
+                    return NotFound(new { Message = "Bouquet image file was not found." });
+                }
+
+                var extension = Path.GetExtension(bouquet.PhotoFileName).ToLowerInvariant();
+                var contentType = extension switch
+                {
+                    ".png" => "image/png",
+                    ".jpg" => "image/jpeg",
+                    ".jpeg" => "image/jpeg",
+                    ".webp" => "image/webp",
+                    _ => "application/octet-stream"
+                };
+
+                var fileBytes = await System.IO.File.ReadAllBytesAsync(filePath);
+                return File(fileBytes, contentType);
+            }
+
+            return NotFound(new { Message = "Bouquet image was not found." });
+        }
+
         [HttpPost("filter")]
         public async Task<IActionResult> GetBouquetsByFilterAsync([FromBody] BouquetFilterView view)
         {
@@ -73,10 +129,6 @@ namespace FlowerShopApi.Controllers
                 int? userId = _httpContextAccessor.HttpContext.User.GetUserId();
                 var bouquets = await _bouquetService.GetBouquetsByFilterAsync(view, userId);
                 var bouquetsDto = _mapper.Map<List<GetBouquetResponse>>(bouquets);
-                for (int i = 0; i < bouquetsDto.Count; i++)
-                {
-                    bouquetsDto[i].PhotoFileName = $"{Request.Scheme}://{Request.Host}/uploads/{bouquetsDto[i].PhotoFileName}";
-                }
                 return Ok(bouquetsDto);
             }
             catch (Exception ex)
@@ -84,20 +136,5 @@ namespace FlowerShopApi.Controllers
                 return BadRequest(new { Message = ex.Message });
             }
         }
-
-        //[HttpGet]
-        //[HttpPut]
-        //public async Task<IActionResult> UpdateBouquetAsync([FromBody] UpdateBouquetDescriptor descriptor)
-        //{
-        //    try
-        //    {
-        //        await _bouquetService.UpdateBouquetAsync(descriptor);
-        //        return Ok(new { Message = "Bouquet updated successfully." });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(new { Message = ex.Message });
-        //    }
-        //}
-    } 
+    }
 }

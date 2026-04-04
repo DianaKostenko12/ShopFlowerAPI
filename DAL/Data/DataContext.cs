@@ -20,6 +20,8 @@ namespace DAL.Data
         public DbSet<BouquetFlower> BouquetFlowers { get; set; }
         public DbSet<OrderBouquet> OrderBouquets { get; set; }
         public DbSet<WrappingPaper> WrappingPapers { get; set; }
+        public DbSet<Color> Colors { get; set; }
+        public DbSet<Category> Categories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -47,10 +49,34 @@ namespace DAL.Data
                 .HasForeignKey(o => o.OrderId)
                 .OnDelete(DeleteBehavior.NoAction);
 
+            modelBuilder.Entity<Color>(entity =>
+            {
+                entity.HasKey(e => e.ColorId);
+                entity.Property(e => e.ColorName).IsRequired().HasMaxLength(100);
+                entity.HasIndex(e => e.ColorName).IsUnique();
+            });
+
+            modelBuilder.Entity<Category>(entity =>
+            {
+                entity.HasKey(e => e.CategoryId);
+                entity.Property(e => e.CategoryName).IsRequired().HasMaxLength(100);
+                entity.HasIndex(e => e.CategoryName).IsUnique();
+            });
+
             modelBuilder.Entity<Flower>(entity =>
             {
                 entity.Property(e => e.FlowerCost)
                       .HasColumnType("decimal(18,2)");
+
+                entity.HasOne(e => e.Color)
+                      .WithMany(c => c.Flowers)
+                      .HasForeignKey(e => e.ColorId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.Category)
+                      .WithMany(c => c.Flowers)
+                      .HasForeignKey(e => e.CategoryId)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             base.OnModelCreating(modelBuilder);

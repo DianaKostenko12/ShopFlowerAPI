@@ -39,6 +39,12 @@ namespace DAL.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<byte[]>("PhotoBytes")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("PhotoContentType")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("PhotoFileName")
                         .HasColumnType("nvarchar(max)");
 
@@ -69,6 +75,9 @@ namespace DAL.Migrations
                     b.Property<int>("FlowerCount")
                         .HasColumnType("int");
 
+                    b.Property<string>("Role")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("BouquetId", "FlowerId");
 
                     b.HasIndex("FlowerId");
@@ -76,7 +85,49 @@ namespace DAL.Migrations
                     b.ToTable("BouquetFlowers");
                 });
 
-            modelBuilder.Entity("DAL.Models.Flower", b =>
+            modelBuilder.Entity("DAL.Models.Flowers.Category", b =>
+                {
+                    b.Property<int>("CategoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CategoryId"));
+
+                    b.Property<string>("CategoryName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("CategoryId");
+
+                    b.HasIndex("CategoryName")
+                        .IsUnique();
+
+                    b.ToTable("Categories");
+                });
+
+            modelBuilder.Entity("DAL.Models.Flowers.Color", b =>
+                {
+                    b.Property<int>("ColorId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ColorId"));
+
+                    b.Property<string>("ColorName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("ColorId");
+
+                    b.HasIndex("ColorName")
+                        .IsUnique();
+
+                    b.ToTable("Colors");
+                });
+
+            modelBuilder.Entity("DAL.Models.Flowers.Flower", b =>
                 {
                     b.Property<int>("FlowerId")
                         .ValueGeneratedOnAdd()
@@ -84,11 +135,11 @@ namespace DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FlowerId"));
 
-                    b.Property<string>("Category")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("CategoryId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("Color")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("ColorId")
+                        .HasColumnType("int");
 
                     b.Property<decimal>("FlowerCost")
                         .HasColumnType("decimal(18,2)");
@@ -108,7 +159,17 @@ namespace DAL.Migrations
                     b.Property<string>("PhotoFileName")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("StemKind")
+                        .HasColumnType("int");
+
+                    b.Property<double>("StemThicknessMm")
+                        .HasColumnType("float");
+
                     b.HasKey("FlowerId");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("ColorId");
 
                     b.ToTable("Flowers");
                 });
@@ -404,7 +465,7 @@ namespace DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DAL.Models.Flower", "Flower")
+                    b.HasOne("DAL.Models.Flowers.Flower", "Flower")
                         .WithMany("BouquetsFlowers")
                         .HasForeignKey("FlowerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -413,6 +474,23 @@ namespace DAL.Migrations
                     b.Navigation("Bouquet");
 
                     b.Navigation("Flower");
+                });
+
+            modelBuilder.Entity("DAL.Models.Flowers.Flower", b =>
+                {
+                    b.HasOne("DAL.Models.Flowers.Category", "Category")
+                        .WithMany("Flowers")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DAL.Models.Flowers.Color", "Color")
+                        .WithMany("Flowers")
+                        .HasForeignKey("ColorId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Color");
                 });
 
             modelBuilder.Entity("DAL.Models.OrderBouquet", b =>
@@ -501,7 +579,17 @@ namespace DAL.Migrations
                     b.Navigation("OrderBouquets");
                 });
 
-            modelBuilder.Entity("DAL.Models.Flower", b =>
+            modelBuilder.Entity("DAL.Models.Flowers.Category", b =>
+                {
+                    b.Navigation("Flowers");
+                });
+
+            modelBuilder.Entity("DAL.Models.Flowers.Color", b =>
+                {
+                    b.Navigation("Flowers");
+                });
+
+            modelBuilder.Entity("DAL.Models.Flowers.Flower", b =>
                 {
                     b.Navigation("BouquetsFlowers");
                 });

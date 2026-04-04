@@ -4,5 +4,6 @@
     {
         public int FlowerId { get; set; }
         public int FlowerCount { get; set; }
+        public string Role {  get; set; }
     }
 }

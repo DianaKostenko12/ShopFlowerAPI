@@ -12,3 +12,4 @@ namespace DAL.Models
         public string Role { get; set; }
     }
 }
+

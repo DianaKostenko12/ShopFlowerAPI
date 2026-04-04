@@ -67,6 +67,8 @@ namespace BLL.Services.Flowers
             flower.FlowerName = descriptor.FlowerName;
             flower.FlowerCost = descriptor.FlowerCost;
             flower.FlowerCount = descriptor.FlowerCount;
+            flower.ColorId = descriptor.ColorId;
+            flower.CategoryId = descriptor.CategoryId;
 
             await _uow.CompleteAsync();
         }

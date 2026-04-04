@@ -38,7 +38,6 @@ namespace FlowerShopApi.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetFlowerById(int id)
         {
-            
             var query = new GetFlowerQuery(id); 
             var flowerData = await _flowerService.GetFlowerByIdAsync(id);
             if (flowerData == null)

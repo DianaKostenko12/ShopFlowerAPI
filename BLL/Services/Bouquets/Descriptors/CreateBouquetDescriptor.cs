@@ -1,9 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace BLL.Services.Bouquets.Descriptors
 {
@@ -12,6 +7,8 @@ namespace BLL.Services.Bouquets.Descriptors
         public string BouquetName { get; set; }
         public string BouquetDescription { get; set; }
         public IFormFile Photo { get; set; }
+        public byte[] PhotoBytes { get; set; }
+        public string PhotoContentType { get; set; }
         public List<FlowerQuantityDescriptor> Flowers { get; set; }
     }
 }

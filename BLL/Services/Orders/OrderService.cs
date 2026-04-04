@@ -1,16 +1,14 @@
 ﻿using AutoMapper;
+using BLL.Services.BouquetAssembly;
+using BLL.Services.BouquetAssembly.Descriptors;
+using BLL.Services.BouquetAssembly.DTOs;
 using BLL.Services.Orders.Descriptors;
 using DAL.Data.UnitOfWork;
 using DAL.Exceptions;
 using DAL.Models;
 using DAL.Models.Orders;
 using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BLL.Services.Orders
 {
@@ -19,15 +17,17 @@ namespace BLL.Services.Orders
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly UserManager<User> _userManager;
+        private readonly IBouquetAssembly _bouquetAssembly;
 
-        public OrderService(IUnitOfWork uow, IMapper mapper, UserManager<User> userManager)
+        public OrderService(IUnitOfWork uow, IMapper mapper, UserManager<User> userManager, IBouquetAssembly bouquetAssembly)
         {
             _uow = uow;
             _mapper = mapper;
             _userManager = userManager;
+            _bouquetAssembly = bouquetAssembly;
         }
 
-        public async Task AddOrderAsync(CreateOrderDescriptor descriptor, int userId)
+        public async Task<int> AddOrderAsync(CreateOrderDescriptor descriptor, int userId)
         {
             var user = await _userManager.FindByIdAsync(userId.ToString());
             var newOrder = new Order()
@@ -63,6 +63,7 @@ namespace BLL.Services.Orders
             }
 
             await _uow.CompleteAsync();
+            return newOrder.OrderId;
         }
 
         public async Task ChangeOrderStatus(int orderId, OrderStatus status)
@@ -77,6 +78,81 @@ namespace BLL.Services.Orders
             existOrder.Status = status;
 
             await _uow.CompleteAsync();
+        }
+
+        public async Task AssembleOrderBouquetsAsync(int orderId, List<BouquetQuantityDescriptor> bouquets)
+        {
+            bool allAssembled = true;
+
+            foreach (var bouquetItem in bouquets)
+            {
+                var bouquet = await _uow.BouquetRepository.GetBouquetWithFlowersAsync(bouquetItem.BouquetId);
+                if (bouquet == null)
+                {
+                    allAssembled = false;
+                    break;
+                }
+
+                var assemblyFlowers = bouquet.BouquetsFlowers.Select(bf => new AssemblyFlowerItem(
+                    bf.FlowerId,
+                    bf.Flower.FlowerName,
+                    bf.FlowerCount,
+                    bf.Flower.HeadSizeCm,
+                    bf.Flower.StemThicknessMm,
+                    bf.Flower.StemKind,
+                    bf.Role
+                )).ToList();
+
+                var plan = new AssemblyPlanDescriptor(
+                    bouquet.BouquetId,
+                    bouquet.Shape,
+                    bouquet.WrappingPaperId,
+                    assemblyFlowers
+                );
+
+                try
+                {
+                    var result = _bouquetAssembly.ExecuteAssembly(plan);
+
+                    if (!ValidateAssemblyResult(result))
+                    {
+                        allAssembled = false;
+                        break;
+                    }
+                }
+                catch
+                {
+                    allAssembled = false;
+                    break;
+                }
+            }
+
+            var newStatus = allAssembled ? OrderStatus.Assembled : OrderStatus.Canceled;
+            await ChangeOrderStatus(orderId, newStatus);
+        }
+
+        private bool ValidateAssemblyResult(AssemblyResult result)
+        {
+            if (!result.IsAssembled)
+                return false;
+
+            if (result.Coordinates == null || result.Coordinates.Count == 0)
+                return false;
+
+            if (result.FinalWidthCm <= 0)
+                return false;
+
+            if (result.Wrapping == null)
+                return false;
+
+            foreach (var coord in result.Coordinates)
+            {
+                if (double.IsNaN(coord.X) || double.IsInfinity(coord.X) ||
+                    double.IsNaN(coord.Y) || double.IsInfinity(coord.Y))
+                    return false;
+            }
+
+            return true;
         }
 
         public async Task<IEnumerable<Order>> GetOrders()

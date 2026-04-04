@@ -191,7 +191,7 @@ namespace BLL.Services.OpenAi.Utils
             foreach (var f in flowers)
             {
                 var role = ResolveRoleText(f.Role);
-                sb.AppendLine($"- {f.Quantity} штук - {f.flower.FlowerName.ToLowerInvariant()} as {role} in color {f.flower.Color}");
+                sb.AppendLine($"- {f.Quantity} штук - {f.flower.FlowerName.ToLowerInvariant()} as {role} in color {f.flower.Color?.ColorName}");
             }
 
             return sb.ToString();

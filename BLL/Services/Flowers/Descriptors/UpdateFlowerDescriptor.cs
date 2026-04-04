@@ -6,5 +6,7 @@
         public string FlowerName { get; set; }
         public int FlowerCount { get; set; }
         public decimal FlowerCost { get; set; }
+        public int? ColorId { get; set; }
+        public int? CategoryId { get; set; }
     }
 }

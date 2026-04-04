@@ -21,6 +21,12 @@ namespace DAL.Repositories.Orders
                             .ThenInclude(ob => ob.Bouquet)
                                 .ThenInclude(b => b.BouquetsFlowers)
                                     .ThenInclude(bf => bf.Flower)
+                                        .ThenInclude(f => f.Color)
+                        .Include(o => o.OrderBouquets)
+                            .ThenInclude(ob => ob.Bouquet)
+                                .ThenInclude(b => b.BouquetsFlowers)
+                                    .ThenInclude(bf => bf.Flower)
+                                        .ThenInclude(f => f.Category)
                 .ToListAsync();
         }
 
@@ -32,6 +38,12 @@ namespace DAL.Repositories.Orders
                         .ThenInclude(ob => ob.Bouquet)
                             .ThenInclude(b => b.BouquetsFlowers)
                                 .ThenInclude(bf => bf.Flower)
+                                    .ThenInclude(f => f.Color)
+                    .Include(o => o.OrderBouquets)
+                        .ThenInclude(ob => ob.Bouquet)
+                            .ThenInclude(b => b.BouquetsFlowers)
+                                .ThenInclude(bf => bf.Flower)
+                                    .ThenInclude(f => f.Category)
                     .ToListAsync();
         }
     }

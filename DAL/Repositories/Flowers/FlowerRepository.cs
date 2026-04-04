@@ -13,12 +13,19 @@ namespace DAL.Repositories.Flowers
 
         public override async Task<Flower> FindAsync(int floweId)
         {
-            return await Sourse.FirstOrDefaultAsync(f => f.FlowerId == floweId && !f.IsDeleted);
+            return await Sourse
+                .Include(f => f.Color)
+                .Include(f => f.Category)
+                .FirstOrDefaultAsync(f => f.FlowerId == floweId && !f.IsDeleted);
         }
 
         public override async Task<IEnumerable<Flower>> FindAllAsync()
         {
-            return await Sourse.Where(f => f.IsDeleted == false).ToListAsync();
+            return await Sourse
+                .Include(f => f.Color)
+                .Include(f => f.Category)
+                .Where(f => f.IsDeleted == false)
+                .ToListAsync();
         }
 
         public override async Task RemoveAsync(Flower flower)

@@ -1,4 +1,4 @@
-﻿namespace DAL.Models
+namespace DAL.Models
 {
     public class Bouquet
     {
@@ -6,6 +6,8 @@
         public string BouquetName { get; set; }
         public string BouquetDescription { get; set; }
         public string PhotoFileName { get; set; }
+        public byte[] PhotoBytes { get; set; }
+        public string PhotoContentType { get; set; }
         public int WrappingPaperId { get; set; }
         public string Shape {  get; set; }
         public bool IsDeleted { get; set; }

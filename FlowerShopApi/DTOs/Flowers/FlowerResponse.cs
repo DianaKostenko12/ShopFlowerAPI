@@ -7,5 +7,7 @@
         public int FlowerCount { get; set; }
         public float FlowerCost { get; set; }
         public string ImgUrl { get; set; }
+        public string Color { get; set; }
+        public string Category { get; set; }
     }
 }

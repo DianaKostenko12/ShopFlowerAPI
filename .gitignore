@@ -363,3 +363,9 @@ MigrationBackup/
 FodyWeavers.xsd
 /FlowerShopApi/UploadedFiles
 /BLL/Services/OpenAi/OpenAiClient/OpenAiConstants.cs
+/.claude/settings.local.json
+/AGENTS.md
+/CLAUDE.md
+/example_тези.pdf
+/ProjectInfo.docx
+/тези.md

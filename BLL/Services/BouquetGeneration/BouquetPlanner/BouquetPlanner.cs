@@ -53,9 +53,9 @@ namespace BLL.Services.BouquetGeneration.BouquetPlanner
         {
             double harmony = 1.0;
 
-            harmony += aiStyleAdvice.Palette.Primary.Contains(flower.Color)
+            harmony += aiStyleAdvice.Palette.Primary.Contains(flower.Color?.ColorName)
                     ? 0.4
-                    : aiStyleAdvice.Palette.Accent.Contains(flower.Color)
+                    : aiStyleAdvice.Palette.Accent.Contains(flower.Color?.ColorName)
                     ? 0.2 : 0;
 
             harmony += role switch
@@ -75,25 +75,25 @@ namespace BLL.Services.BouquetGeneration.BouquetPlanner
             var flowers = _flowerService.GetFlowersAsync();
 
             var filteredFlowers = flowers.Result.Where(flower =>
-                aiStyleAdvice.Roles.Focal.Categories.Contains(flower.Category) ||
-                aiStyleAdvice.Roles.Semi.Categories.Contains(flower.Category) ||
-                aiStyleAdvice.Roles.Filler.Categories.Contains(flower.Category) ||
-                aiStyleAdvice.Roles.Greenery.Categories.Contains(flower.Category)
+                aiStyleAdvice.Roles.Focal.Categories.Contains(flower.Category?.CategoryName) ||
+                aiStyleAdvice.Roles.Semi.Categories.Contains(flower.Category?.CategoryName) ||
+                aiStyleAdvice.Roles.Filler.Categories.Contains(flower.Category?.CategoryName) ||
+                aiStyleAdvice.Roles.Greenery.Categories.Contains(flower.Category?.CategoryName)
             )
             .Where(f =>
-                aiStyleAdvice.Palette.Primary.Contains(f.Color) ||
-                aiStyleAdvice.Palette.Accent.Contains(f.Color)
+                aiStyleAdvice.Palette.Primary.Contains(f.Color?.ColorName) ||
+                aiStyleAdvice.Palette.Accent.Contains(f.Color?.ColorName)
             )
             .ToList();
 
             return filteredFlowers.Select(flower =>
                     {
                     var role =
-                        aiStyleAdvice.Roles.Focal.Categories.Contains(flower.Category)
+                        aiStyleAdvice.Roles.Focal.Categories.Contains(flower.Category?.CategoryName)
                             ? RolesConstants.FocalCategory
-                            : aiStyleAdvice.Roles.Greenery.Categories.Contains(flower.Category)
+                            : aiStyleAdvice.Roles.Greenery.Categories.Contains(flower.Category?.CategoryName)
                             ? RolesConstants.GreeneryCategory
-                            : aiStyleAdvice.Roles.Semi.Categories.Contains(flower.Category)
+                            : aiStyleAdvice.Roles.Semi.Categories.Contains(flower.Category?.CategoryName)
                             ? RolesConstants.SemiCategory
                             : RolesConstants.FillerCategory;
                     return new FlowerWithRole(
