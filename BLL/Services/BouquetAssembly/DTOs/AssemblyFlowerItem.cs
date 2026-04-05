@@ -1,4 +1,5 @@
-﻿using DAL.Models.Flowers;
+﻿using DAL.Models;
+using DAL.Models.Flowers;
 
 namespace BLL.Services.BouquetAssembly.DTOs
 {
@@ -10,6 +11,6 @@ namespace BLL.Services.BouquetAssembly.DTOs
         int HeadSizeCm,
         double StemThicknessMm,
         StemType StemKind,
-        string Role
+        FlowerRole Role
     );
 }

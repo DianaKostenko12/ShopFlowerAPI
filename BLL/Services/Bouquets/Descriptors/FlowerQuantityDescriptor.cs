@@ -1,9 +1,11 @@
-﻿namespace BLL.Services.Bouquets.Descriptors
+﻿using DAL.Models;
+
+namespace BLL.Services.Bouquets.Descriptors
 {
     public class FlowerQuantityDescriptor
     {
         public int FlowerId { get; set; }
         public int FlowerCount { get; set; }
-        public string Role {  get; set; }
+        public FlowerRole Role { get; set; }
     }
 }

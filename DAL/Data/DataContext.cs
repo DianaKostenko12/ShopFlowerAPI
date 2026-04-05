@@ -1,4 +1,4 @@
-﻿using DAL.Models;
+using DAL.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -36,6 +36,10 @@ namespace DAL.Data
                 .WithMany(bf => bf.BouquetsFlowers)
                 .HasForeignKey(f => f.FlowerId);
 
+            modelBuilder.Entity<BouquetFlower>()
+                .Property(bf => bf.Role)
+                .HasConversion<string>();
+
             modelBuilder.Entity<OrderBouquet>()
                 .HasKey(ob => new { ob.OrderId, ob.BouquetId });
             modelBuilder.Entity<OrderBouquet>()
@@ -53,6 +57,7 @@ namespace DAL.Data
             {
                 entity.HasKey(e => e.ColorId);
                 entity.Property(e => e.ColorName).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Shade).HasMaxLength(50);
                 entity.HasIndex(e => e.ColorName).IsUnique();
             });
 
@@ -61,6 +66,18 @@ namespace DAL.Data
                 entity.HasKey(e => e.CategoryId);
                 entity.Property(e => e.CategoryName).IsRequired().HasMaxLength(100);
                 entity.HasIndex(e => e.CategoryName).IsUnique();
+            });
+
+            modelBuilder.Entity<WrappingPaper>(entity =>
+            {
+                entity.HasKey(e => e.WrappingPaperId);
+                entity.Property(e => e.Type).HasConversion<int>();
+                entity.Property(e => e.Pattern).HasConversion<int>();
+
+                entity.HasOne(e => e.Color)
+                      .WithMany()
+                      .HasForeignKey(e => e.ColorId)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<Flower>(entity =>

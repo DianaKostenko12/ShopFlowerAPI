@@ -1,5 +1,6 @@
 ﻿using BLL.Services.BouquetAssembly.DTOs;
 using BLL.Services.BouquetAssembly.FlowersProcessingStep.DTOs;
+using DAL.Models;
 
 namespace BLL.Services.BouquetAssembly.BouquetAssemblyStrategy
 {
@@ -9,44 +10,31 @@ namespace BLL.Services.BouquetAssembly.BouquetAssemblyStrategy
         {
             var layoutCoordinates = new List<FlowerCoordinate>();
 
-            // 1. Розділяємо на Центр (Focal) та Периферію (Інші)
-            var focals = processedFlowersForAssembly.Where(f => f.Item.Role == "Focal").ToList();
-            var otherRoles = processedFlowersForAssembly.Where(f => f.Item.Role != "Focal").ToList();
+            var focals = processedFlowersForAssembly.Where(f => f.Item.Role == FlowerRole.Focal).ToList();
+            var otherRoles = processedFlowersForAssembly.Where(f => f.Item.Role != FlowerRole.Focal).ToList();
 
             double currentRadius = 0;
 
-            // 2. ЦЕНТР (Focal Core)
             if (focals.Any())
             {
-                // Ставимо першу фокальну в абсолютний центр
                 layoutCoordinates.Add(new FlowerCoordinate(focals[0], 0, 0));
 
                 if (focals.Count > 1)
                 {
-                    // Розраховуємо радіус першого кільця так, щоб бутони торкалися
                     currentRadius = focals[0].Item.HeadSizeCm;
                     CalculateRingCoordinates(focals.Skip(1).ToList(), currentRadius, layoutCoordinates);
                 }
             }
 
-            // 3. ПОБУДОВА КІЛЕЦЬ ДЛЯ ІНШИХ КВІТІВ
-            // Міксуємо залишок "розумним" алгоритмом
             var balancedFlowerQueue = PrepareBalancedSequence(otherRoles);
 
             while (balancedFlowerQueue.Count > 0)
             {
-                // Динамічний крок радіуса: беремо розмір наступної квітки в черзі
                 double nextFlowerRadius = balancedFlowerQueue.Peek().Item.HeadSizeCm / 2.0;
+                currentRadius += (nextFlowerRadius * 1.5);
 
-                // Збільшуємо загальний радіус букета, щоб квіти не налізли на попереднє кільце
-                currentRadius += (nextFlowerRadius * 1.5); // 1.5 - коефіцієнт легкої "повітряності" букета
-
-                // РОЗУМНА МАТЕМАТИКА: Скільки квітів реально влізе в це кільце?
-                // n = PI / arcsin(r / R)
                 double maxCapacityDouble = Math.PI / Math.Asin(nextFlowerRadius / currentRadius);
                 int capacity = (int)Math.Floor(maxCapacityDouble);
-
-                // Якщо до кінця черги залишилося менше квітів, ніж місткість кільця, беремо залишок
                 capacity = Math.Min(capacity, balancedFlowerQueue.Count);
 
                 var currentRingFlowers = TakeFromQueue(balancedFlowerQueue, capacity);
@@ -64,14 +52,11 @@ namespace BLL.Services.BouquetAssembly.BouquetAssemblyStrategy
                 return;
             }
 
-            // Точний кут між центрами квітів у цьому кільці
             double angleStep = (2 * Math.PI) / flowersCount;
 
             for (int i = 0; i < flowersCount; i++)
             {
                 double angle = i * angleStep;
-
-                // Декартові координати з високою точністю
                 double x = Math.Round(radius * Math.Cos(angle), 3);
                 double y = Math.Round(radius * Math.Sin(angle), 3);
 
@@ -81,7 +66,6 @@ namespace BLL.Services.BouquetAssembly.BouquetAssemblyStrategy
 
         private Queue<ProcessedFlower> PrepareBalancedSequence(List<ProcessedFlower> flowersWithOtherRoles)
         {
-            // Групуємо квіти за ролями і рахуємо їх кількість
             var flowerQueuesByRole = flowersWithOtherRoles.GroupBy(f => f.Item.Role)
                                     .OrderByDescending(g => g.Count())
                                     .Select(g => new Queue<ProcessedFlower>(g))
@@ -89,16 +73,12 @@ namespace BLL.Services.BouquetAssembly.BouquetAssemblyStrategy
 
             var mixedList = new List<ProcessedFlower>();
 
-        // Алгоритм рівномірного вплетення (Round-Robin)
-        // Він бере по одній квітці з найбільших груп, створюючи ідеальний паттерн
             while (flowerQueuesByRole.Any(roleQueue => roleQueue.Count > 0))
             {
                 foreach (var roleQueue in flowerQueuesByRole)
                 {
-                    // Якщо в цій конкретній черзі ще залишилися квіти
                     if (roleQueue.Count > 0)
                     {
-                        // Беремо верхню квітку і додаємо в наш фінальний змішаний список
                         mixedList.Add(roleQueue.Dequeue());
                     }
                 }

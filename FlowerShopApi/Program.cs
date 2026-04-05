@@ -101,6 +101,8 @@ builder.Services.AddScoped<IFlowerService, FlowerService>();
 builder.Services.AddScoped<IBouquetService, BouquetService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IBouquetGenerationService, BouquetGenerationService>();
+builder.Services.AddScoped<IColorMatchingService, ColorMatchingService>();
+builder.Services.AddScoped<IFlowerSelector, FlowerSelector>();
 builder.Services.AddScoped<IFlowerCompositionBuilder, FlowerCompositionBuilder>();
 builder.Services.AddScoped<IOpenAIService, OpenAIService>();
 builder.Services.AddHttpClient<IOpenAiClient, OpenAiClient>();

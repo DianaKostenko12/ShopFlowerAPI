@@ -1,8 +1,8 @@
-﻿namespace BLL.Services.OpenAi.Dto
+namespace BLL.Services.OpenAi.Dto
 {
     public sealed record ColorPalette
     (
-        List<string> Primary,
-        List<string> Accent 
+        List<ColorPreference> Primary,
+        List<ColorPreference> Accent
     );
 }

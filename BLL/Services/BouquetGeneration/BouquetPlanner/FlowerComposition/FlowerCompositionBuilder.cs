@@ -1,5 +1,6 @@
 ﻿using BLL.Services.BouquetGeneration.BouquetPlanner.Dto;
 using BLL.Services.OpenAi.Dto;
+using DAL.Models;
 
 namespace BLL.Services.BouquetGeneration.BouquetPlanner.FlowerComposition
 {
@@ -9,12 +10,12 @@ namespace BLL.Services.BouquetGeneration.BouquetPlanner.FlowerComposition
         {
             List<Dto.FlowerComposition> completedСomposition = new();
 
-            var roleBudgetProportions = new Dictionary<string, decimal>
+            var roleBudgetProportions = new Dictionary<FlowerRole, decimal>
             {
-                { RolesConstants.FocalCategory, 0.4m },
-                { RolesConstants.SemiCategory, 0.3m },
-                { RolesConstants.FillerCategory, 0.2m },
-                { RolesConstants.GreeneryCategory, 0.1m }
+                { FlowerRole.Focal, 0.4m },
+                { FlowerRole.Semi, 0.3m },
+                { FlowerRole.Filler, 0.2m },
+                { FlowerRole.Greenery, 0.1m }
             };
 
             foreach (var role in roleBudgetProportions.Keys)
@@ -23,27 +24,27 @@ namespace BLL.Services.BouquetGeneration.BouquetPlanner.FlowerComposition
 
                 var (minQuantity, maxQuantity) = role switch
                 {
-                    RolesConstants.FocalCategory => (aiStyleRecommendation.Roles.Focal.Min, aiStyleRecommendation.Roles.Focal.Max),
-                    RolesConstants.SemiCategory => (aiStyleRecommendation.Roles.Semi.Min, aiStyleRecommendation.Roles.Semi.Max),
-                    RolesConstants.FillerCategory => (aiStyleRecommendation.Roles.Filler.Min, aiStyleRecommendation.Roles.Filler.Max),
-                    RolesConstants.GreeneryCategory => (aiStyleRecommendation.Roles.Greenery.Min, aiStyleRecommendation.Roles.Greenery.Max),
+                    FlowerRole.Focal => (aiStyleRecommendation.Roles.Focal.Min, aiStyleRecommendation.Roles.Focal.Max),
+                    FlowerRole.Semi => (aiStyleRecommendation.Roles.Semi.Min, aiStyleRecommendation.Roles.Semi.Max),
+                    FlowerRole.Filler => (aiStyleRecommendation.Roles.Filler.Min, aiStyleRecommendation.Roles.Filler.Max),
+                    FlowerRole.Greenery => (aiStyleRecommendation.Roles.Greenery.Min, aiStyleRecommendation.Roles.Greenery.Max),
                     _ => throw new ArgumentOutOfRangeException(nameof(role))
                 };
 
                 var flowerCandidates = flowersWithRole
                     .Where(f => f.Role == role)
                     .OrderByDescending(f => (decimal)f.Harmony / f.Flower.FlowerCost)
-                .ToList();
+                    .ToList();
 
                 if (!flowerCandidates.Any())
                 {
                     continue;
                 }
 
-                if(role == RolesConstants.FocalCategory)
+                if (role == FlowerRole.Focal)
                 {
-                   var focalRoleComposition = ComposeFlowersForFocalRole(flowerCandidates, roleBudget, maxQuantity, minQuantity);
-                   completedСomposition.Add(focalRoleComposition);
+                    var focalRoleComposition = ComposeFlowersForFocalRole(flowerCandidates, roleBudget, maxQuantity, minQuantity);
+                    completedСomposition.Add(focalRoleComposition);
                 }
                 else
                 {
@@ -124,7 +125,7 @@ namespace BLL.Services.BouquetGeneration.BouquetPlanner.FlowerComposition
         private Dto.FlowerComposition ComposeFlowersForFocalRole(List<FlowerWithRole> flowers, decimal roleBudget, int maxQuantity, int minQuantity)
         {
             double bestHarmonyScore = -1;
-            var roleComposition = new Dto.FlowerComposition(null, null, 0, 0);
+            var roleComposition = new Dto.FlowerComposition(null, default, 0, 0);
 
             foreach (var flowerCandidate in flowers)
             {

@@ -1,5 +1,6 @@
-﻿using DAL.Data;
+using DAL.Data;
 using DAL.Repositories.Base;
+using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Repositories.WrappingPapers
 {
@@ -7,6 +8,20 @@ namespace DAL.Repositories.WrappingPapers
     {
         public WrappingPaperRepository(DataContext context) : base(context)
         {
+        }
+
+        public override async Task<IEnumerable<Models.WrappingPaper>> FindAllAsync()
+        {
+            return await Sourse
+                .Include(wp => wp.Color)
+                .ToListAsync();
+        }
+
+        public override async Task<Models.WrappingPaper> FindAsync(int id)
+        {
+            return await Sourse
+                .Include(wp => wp.Color)
+                .FirstOrDefaultAsync(wp => wp.WrappingPaperId == id);
         }
     }
 }

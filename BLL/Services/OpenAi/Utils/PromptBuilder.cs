@@ -2,6 +2,7 @@
 using BLL.Services.BouquetGeneration.BouquetPlanner.Dto;
 using BLL.Services.BouquetGeneration.BouquetPlanner.FlowerComposition.Dto;
 using BLL.Services.BouquetGeneration.Descriptors;
+using BLL.Services.Colors;
 using DAL.Models;
 using System.Text;
 
@@ -9,139 +10,138 @@ namespace BLL.Services.OpenAi.Utils
 {
     internal static class PromptBuilder
     {
+        private static readonly string[] AllowedShades =
+        [
+            "світлий",
+            "темний",
+            "теплий",
+            "холодний",
+            "пастельний",
+            "ніжний",
+            "яскравий",
+            "насичений",
+            "приглушений",
+            "нейтральний"
+        ];
+
         internal static string BuildStylePrompt(GenerateBouquetDescriptor bouquet)
         {
-            string bouquetColors = string.Join(",", bouquet.Color);
+            string bouquetColors = bouquet.Color is { Count: > 0 }
+                ? string.Join(", ", bouquet.Color)
+                : "не вказано";
+            string allowedBaseColors = string.Join(", ", BaseColorNormalizer.GetAllowedBaseColors());
+            string allowedShades = string.Join(", ", AllowedShades);
+            string allowedWrappingTypes = string.Join(", ", Enum.GetNames<WrappingPaperType>());
+            string allowedWrappingPatterns = string.Join(", ", Enum.GetNames<WrappingPaperPattern>());
 
             return $$"""
                 You are a florist assistant.
 
-                Style: {{bouquet.Style}}
-                Shape: {{bouquet.Shape}}
-                Color preference: {{bouquetColors}}
-                Budget: {{bouquet.Budget}}
+                User request:
+                - Style: {{bouquet.Style}}
+                - Shape: {{bouquet.Shape}}
+                - Color preference: {{bouquetColors}}
+                - Budget: {{bouquet.Budget}}
+                - Additional comment: {{bouquet.AdditionalComment}}
 
-                Task:
-                Згенерувати деталі композиції букета.
+                Return valid JSON only.
+                No markdown, no comments, no extra text.
+                All keys must stay exactly as in the schema.
 
-                STRICT OUTPUT FORMAT:
+                Language rules:
+                - JSON keys: English only.
+                - JSON values: Ukrainian only.
+                - Exception: wrappingPaper.type and wrappingPaper.pattern must use exact enum values from the allowed lists.
 
-                Output MUST be valid JSON.
-                Output MUST start with { and end with }.
-                Do NOT include any text before or after JSON.
-                Do NOT use markdown or ``` blocks.
-                Do NOT add comments.
-                Do NOT add trailing commas.
-                All fields are required.
+                Color rules:
+                - Every color must be an object with: baseColor, shade.
+                - baseColor must be one of: {{allowedBaseColors}}
+                - shade should be a short Ukrainian descriptor, preferably one of: {{allowedShades}}
+                - Convert specific shades to baseColor + shade.
+                - Example: бургунді -> червоний + темний
+                - Example: айворі -> білий + теплий
+                - Example: пудрово-рожевий -> рожевий + ніжний
+                - Do not return specific database shade names.
 
-                CRITICAL STRUCTURE RULE:
-
-                JSON keys MUST remain EXACTLY as defined in the schema.
-                DO NOT translate keys.
-                DO NOT rename keys.
-                DO NOT remove keys.
-                DO NOT add new keys.
-
-                CRITICAL LANGUAGE RULE:
-
-                JSON keys → English ONLY.
-                JSON values → Ukrainian ONLY.
-                ANY English word inside values is FORBIDDEN.
-                If any value is not Ukrainian → response is INVALID.
-
-                OUTPUT LANGUAGE RULES:
-
-                bouquetName → Ukrainian only.
-                palette colors → Ukrainian only.
-                flower categories → Ukrainian only.
-                wrappingPaper.colors → Ukrainian only.
-                wrappingPaper.patterns → Ukrainian only.
-
-                COLOR RULES:
-
-                Use ONLY one-word base colors.
-                Allowed colors ONLY:
-                червоний, рожевий, синій, білий, жовтий, зелений, фіолетовий, бежевий
-                Any other color is FORBIDDEN.
-                No оттенки or descriptive adjectives.
-
-                FLOWER CATEGORY RULES:
-                Any flower and greenery categories are allowed in Ukrainian.
-                Example flower categories: Троянда, Півонія, Тюльпан, Еустома, Гортензія, Ранункулюс, Гіпсофіла, Лілія, Орхідея, Хризантема, Айстра, Соняшник.
-                Example greenery categories: Зелень, Евкаліпт, Аспарагус, Папороть, Рускус, Сальвія, Лаванда.
-                For focal, semi, and filler – select categories logically according to the role.
-                For greenery – you can specify 1–3 greenery categories depending on the budget.
-
-                BUDGET RULES:
-
-                Low budget → small numbers.
-                Medium budget → balanced numbers.
-                High budget → larger numbers.
-                Numbers MUST be realistic.
-                Avoid excessive quantities.
+                Wrapping rules:
+                - wrappingPaper.type must be one of: {{allowedWrappingTypes}}
+                - wrappingPaper.pattern must be one of: {{allowedWrappingPatterns}}
+                - wrappingPaper.colors must follow the same baseColor + shade format.
 
                 Bouquet rules:
+                - bouquetName: 3-5 words, Ukrainian.
+                - palette.primary: 2-3 colors.
+                - palette.accent: 1-2 colors.
+                - Focal/Semi/Filler: max 2 categories each.
+                - Greenery: 1-3 categories.
+                - Flower categories and greenery names: Ukrainian.
+                - wrappingPaper colors should match the palette by meaning.
+                - Quantities must be realistic for the budget.
 
-                bouquetName: 3–5 words, Ukrainian.
-                palette: 2–3 primary, 1–2 accent.
-                Focal: max 2 categories.
-                Semi: max 2 categories.
-                Filler: max 2 categories.
-                Greenery: 1-3 categories of greenery.
-                wrappingPaper.colors MUST be chosen from palette.
-                wrappingPaper.patterns MUST be simple Ukrainian words:
-                (однотонний, лінії, крапки, без візерунка)
+                Before returning, verify:
+                - JSON is valid.
+                - All keys are unchanged.
+                - Every color has both baseColor and shade.
+                - baseColor values are from the allowed list.
+                - wrappingPaper.type and wrappingPaper.pattern are from the allowed lists.
 
-                SELF-VALIDATION (MANDATORY):
-                Before returning result, check:
-
-                Is JSON valid?
-                Are ALL keys unchanged?
-                Are ALL values Ukrainian?
-                Are colors from allowed list only?
-                Are flower categories from allowed list only?
-
-                If ANY rule is violated → regenerate internally until valid.
-
-                Return JSON ONLY in this structure:
+                Return this JSON structure only:
                 {
-                "bouquetName": "",
-                "palette": {
-                "primary": [],
-                "accent": []
-                },
-                "roles": {
-                "focal": {
-                "categories": [],
-                "min": 0,
-                "max": 0
-                },
-                "semi": {
-                "categories": [],
-                "min": 0,
-                "max": 0
-                },
-                "filler": {
-                "categories": [],
-                "min": 0,
-                "max": 0
-                },
-                "greenery": {
-                "categories": [],
-                "min": 0,
-                "max": 0
-                }
-                },
-                "wrappingPaper": {
-                "colors": [],
-                "patterns": []
-                }
+                  "bouquetName": "",
+                  "palette": {
+                    "primary": [
+                      {
+                        "baseColor": "",
+                        "shade": ""
+                      }
+                    ],
+                    "accent": [
+                      {
+                        "baseColor": "",
+                        "shade": ""
+                      }
+                    ]
+                  },
+                  "roles": {
+                    "focal": {
+                      "categories": [],
+                      "min": 0,
+                      "max": 0
+                    },
+                    "semi": {
+                      "categories": [],
+                      "min": 0,
+                      "max": 0
+                    },
+                    "filler": {
+                      "categories": [],
+                      "min": 0,
+                      "max": 0
+                    },
+                    "greenery": {
+                      "categories": [],
+                      "min": 0,
+                      "max": 0
+                    }
+                  },
+                  "wrappingPaper": {
+                    "colors": [
+                      {
+                        "baseColor": "",
+                        "shade": ""
+                      }
+                    ],
+                    "type": "",
+                    "pattern": ""
+                  }
                 }
                 """;
         }
 
         internal static string BuildImagePrompt(BouquetDetails bouquetDetails)
         {
+            var hasGreenery = HasGreenery(bouquetDetails.FlowerComposition);
+
             return $"""
                 Create a realistic, high-quality photo of a professionally arranged flower bouquet.
 
@@ -152,17 +152,13 @@ namespace BLL.Services.OpenAi.Utils
                 {BuildFlowerList(bouquetDetails.FlowerComposition)}
 
                 Arrangement rules:
-                - Focal flowers are placed in the center and visually dominate.
-                - Semi flowers surround the focal flowers.
-                - Filler flowers fill gaps and add softness.
-                {(HasGreenery(bouquetDetails.FlowerComposition) ? "- Greenery frames the bouquet and adds volume." : "- No greenery or leaves should be included.")}
+                {BuildArrangementRules(bouquetDetails.Shape, hasGreenery)}
 
                 Wrapping:
                 {BuildWrapping(bouquetDetails.WrappingPaper)}
 
                 Style and rendering:
                 - Natural florist style
-                - Balanced and harmonious composition
                 - Each flower must be a distinct, individual object (to help with counting)
                 - All flowers clearly visible and identifiable
                 - Soft natural daylight
@@ -175,36 +171,81 @@ namespace BLL.Services.OpenAi.Utils
         {
             return shape?.ToLowerInvariant() switch
             {
-                "кругла" => "Round bouquet with a balanced, symmetrical composition.",
-                "подовжена" => "Elongated vertical bouquet with elegant height.",
-                "горизонтальна" => "Horizontal bouquet with wide, low-profile composition.",
-                "асиметрична" => "Asymmetrical bouquet with a natural, organic flow.",
-                _ => "Round bouquet with a balanced, symmetrical composition."
+                "кругла" =>
+                    "Round dome-shaped bouquet viewed from above as concentric circles. Perfectly symmetrical in all directions. Flat top, compact and full.",
+                "подовжена" =>
+                    "Wide crescent-shaped bouquet, much wider than it is deep. Front-facing half-moon silhouette with gently curving edges. Flowers at the tips angle outward, center flowers point straight up.",
+                "асиметрична" =>
+                    "Asymmetrical bouquet with one tall, lush dominant side and one low, restrained side. The dominant side rises noticeably higher with flowers leaning outward. The low side stays close to the base. Overall off-center, dynamic silhouette.",
+                _ =>
+                    "Round dome-shaped bouquet viewed from above as concentric circles. Perfectly symmetrical in all directions. Flat top, compact and full."
             };
         }
 
-        private static string BuildFlowerList(
-            IEnumerable<FlowerComposition> flowers)
+        private static string BuildArrangementRules(string shape, bool hasGreenery)
+        {
+            var greeneryRule = hasGreenery
+                ? "- Greenery is evenly interspersed among other flowers throughout the arrangement."
+                : "- No greenery or leaves should be included.";
+
+            var shapeRules = shape?.ToLowerInvariant() switch
+            {
+                "кругла" =>
+                    """
+                    - One focal flower sits at the exact center of the bouquet.
+                    - Additional focal flowers form a tight first ring around the center.
+                    - Semi, filler, and greenery flowers are evenly mixed in alternating concentric rings radiating outward.
+                    - Each ring has uniform spacing between flowers.
+                    - All flowers point straight up with no tilt, creating a flat dome profile.
+                    """,
+                "подовжена" =>
+                    """
+                    - Focal flowers form the central spine running along the crescent arc.
+                    - Other flowers fill outward in elliptical layers, with width growing much faster than depth.
+                    - The bouquet spreads wide left-to-right but stays shallow front-to-back.
+                    - Flowers near the crescent tips tilt outward up to 30 degrees.
+                    - Center flowers stand upright.
+                    """,
+                "асиметрична" =>
+                    """
+                    - Smallest flower heads are positioned near the center, largest heads on the outer edges.
+                    - Flower roles do not determine position; head size matters more.
+                    - The entire composition shifts to one side, creating a deliberate off-center look.
+                    - On the dominant side, flowers rise progressively higher and lean outward at steeper angles.
+                    - On the low side, flowers stay close to the base with minimal tilt.
+                    """,
+                _ =>
+                    """
+                    - Focal flowers are placed in the center and visually dominate.
+                    - Semi flowers surround the focal flowers.
+                    - Filler flowers fill gaps and add softness.
+                    """
+            };
+
+            return shapeRules.TrimEnd() + "\n" + greeneryRule;
+        }
+
+        private static string BuildFlowerList(IEnumerable<FlowerComposition> flowers)
         {
             var sb = new StringBuilder();
 
             foreach (var f in flowers)
             {
                 var role = ResolveRoleText(f.Role);
-                sb.AppendLine($"- {f.Quantity} штук - {f.flower.FlowerName.ToLowerInvariant()} as {role} in color {f.flower.Color?.ColorName}");
+                sb.AppendLine($"- {f.Quantity} pieces of {f.flower.FlowerName.ToLowerInvariant()} as {role} in color {f.flower.Color?.ColorName}");
             }
 
             return sb.ToString();
         }
 
-        private static string ResolveRoleText(string role)
+        private static string ResolveRoleText(FlowerRole role)
         {
             return role switch
             {
-                RolesConstants.FocalCategory => "focal flowers",
-                RolesConstants.SemiCategory => "semi flowers",
-                RolesConstants.FillerCategory => "filler flowers",
-                RolesConstants.GreeneryCategory => "greenery",
+                FlowerRole.Focal => "focal flowers",
+                FlowerRole.Semi => "semi flowers",
+                FlowerRole.Filler => "filler flowers",
+                FlowerRole.Greenery => "greenery",
                 _ => "flowers"
             };
         }
@@ -216,9 +257,26 @@ namespace BLL.Services.OpenAi.Utils
                 return "No wrapping specified.";
             }
 
-            return $"Wrapped in {wrapping.Pattern?.ToLowerInvariant() ?? "plain"} " +
-                   $"{wrapping.Color?.ToLowerInvariant() ?? "neutral"} " +
-                   $"{wrapping.Type?.ToLowerInvariant() ?? "paper"}.";
+            var patternText = wrapping.Pattern switch
+            {
+                WrappingPaperPattern.Plain => "plain",
+                WrappingPaperPattern.Lines => "lines",
+                WrappingPaperPattern.Dots => "dots",
+                WrappingPaperPattern.NoPattern => "without pattern",
+                _ => "plain"
+            };
+
+            var typeText = wrapping.Type switch
+            {
+                WrappingPaperType.Paper => "paper",
+                WrappingPaperType.Kraft => "kraft paper",
+                WrappingPaperType.Film => "film wrap",
+                WrappingPaperType.Mesh => "mesh wrap",
+                WrappingPaperType.Fabric => "fabric wrap",
+                _ => "paper"
+            };
+
+            return $"Wrapped in {patternText} {wrapping.Color?.ColorName?.ToLowerInvariant() ?? "neutral"} {typeText}.";
         }
 
         private static bool HasGreenery(IEnumerable<FlowerComposition> flowers)
@@ -228,7 +286,7 @@ namespace BLL.Services.OpenAi.Utils
                 return false;
             }
 
-            return flowers.Any(f => f.Role == RolesConstants.GreeneryCategory);
+            return flowers.Any(f => f.Role == FlowerRole.Greenery);
         }
     }
 }

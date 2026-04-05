@@ -1,8 +1,9 @@
-﻿namespace BLL.Services.OpenAi.Dto
+namespace BLL.Services.OpenAi.Dto
 {
     public sealed record WrappingRecommendation
     (
-        List<string> Colors,
-        List<string> Patterns
+        List<ColorPreference> Colors,
+        string Type,
+        string Pattern
     );
 }
