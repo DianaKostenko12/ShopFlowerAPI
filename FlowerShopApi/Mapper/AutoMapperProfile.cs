@@ -13,6 +13,7 @@ using FlowerShopApi.DTOs.Colors;
 using FlowerShopApi.DTOs.Flowers;
 using FlowerShopApi.DTOs.Orders;
 using FlowerShopApi.DTOs.Users;
+using FlowerShopApi.DTOs.WrappingPapers;
 
 namespace FlowerShopApi.Mapper
 {
@@ -40,6 +41,11 @@ namespace FlowerShopApi.Mapper
 
             CreateMap<Color, ColorResponse>();
             CreateMap<CreateColorRequest, Color>();
+
+            CreateMap<WrappingPaper, WrappingPaperResponse>()
+                .ForMember(dest => dest.ColorName, opt => opt.MapFrom(src => src.Color != null ? src.Color.ColorName : null))
+                .ForMember(dest => dest.ColorShade, opt => opt.MapFrom(src => src.Color != null ? src.Color.Shade : null));
+            CreateMap<CreateWrappingPaperRequest, WrappingPaper>();
 
             CreateMap<FlowerQuantityRequest, FlowerQuantityDescriptor>();
             CreateMap<CreateBouquetRequest, CreateBouquetDescriptor>();

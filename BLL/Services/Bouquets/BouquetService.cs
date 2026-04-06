@@ -34,6 +34,22 @@ namespace BLL.Services.Bouquets
                 byte[] photoBytes = null;
                 string photoContentType = null;
 
+                if (descriptor.WrappingPaperId <= 0)
+                {
+                    throw new ArgumentException("WrappingPaperId must be provided.");
+                }
+
+                var wrappingPaper = await _uow.WrappingPaperRepository.FindAsync(descriptor.WrappingPaperId);
+                if (wrappingPaper == null)
+                {
+                    throw new ArgumentException($"WrappingPaper with ID {descriptor.WrappingPaperId} does not exist.");
+                }
+
+                if (string.IsNullOrWhiteSpace(descriptor.Shape))
+                {
+                    throw new ArgumentException("Shape must be provided.");
+                }
+
                 if (descriptor.Photo != null)
                 {
                     if (_fileStorage == null)
@@ -57,6 +73,8 @@ namespace BLL.Services.Bouquets
                 {
                     BouquetName = descriptor.BouquetName,
                     BouquetDescription = descriptor.BouquetDescription,
+                    WrappingPaperId = descriptor.WrappingPaperId,
+                    Shape = descriptor.Shape,
                     PhotoFileName = fileName,
                     PhotoBytes = photoBytes,
                     PhotoContentType = photoContentType,
@@ -174,4 +192,3 @@ namespace BLL.Services.Bouquets
         }
     }
 }
-

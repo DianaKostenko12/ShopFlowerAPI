@@ -6,6 +6,8 @@ namespace FlowerShopApi.DTOs.Bouquets
     {
         public string BouquetName { get; set; }
         public string BouquetDescription { get; set; }
+        public int WrappingPaperId { get; set; }
+        public string Shape { get; set; }
         public IFormFile Photo { get; set; }
         public List<FlowerQuantityRequest> Flowers { get; set; }
     }

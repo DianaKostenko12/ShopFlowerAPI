@@ -1,4 +1,4 @@
-﻿using BLL.Services.Colors;
+using BLL.Services.Colors;
 using BLL.Services.OpenAi.Dto;
 using DAL.Data.UnitOfWork;
 using DAL.Models;
@@ -14,6 +14,20 @@ namespace BLL.Services.WrappingPapers
         {
             _uow = uow;
             _colorMatchingService = colorMatchingService;
+        }
+
+        public async Task AddWrappingPaperAsync(WrappingPaper wrappingPaper)
+        {
+            ArgumentNullException.ThrowIfNull(wrappingPaper);
+
+            var color = await _uow.ColorRepository.FindAsync(wrappingPaper.ColorId);
+            if (color == null)
+            {
+                throw new KeyNotFoundException($"Color with ID {wrappingPaper.ColorId} was not found.");
+            }
+
+            await _uow.WrappingPaperRepository.AddAsync(wrappingPaper);
+            await _uow.CompleteAsync();
         }
 
         public async Task<IEnumerable<WrappingPaper>> GetWrappingPapersAsync()
