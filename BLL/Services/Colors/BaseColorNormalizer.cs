@@ -133,28 +133,7 @@ namespace BLL.Services.Colors
         private static string Prepare(string value)
         {
             var normalized = value.Trim().ToLowerInvariant().Replace('_', ' ');
-            normalized = RemoveDiacritics(normalized);
-
             return normalized;
-        }
-
-        private static string RemoveDiacritics(string text)
-        {
-            var normalizedString = text.Normalize(NormalizationForm.FormD);
-            var stringBuilder = new StringBuilder();
-
-            foreach (var character in normalizedString)
-            {
-                var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(character);
-                if (unicodeCategory != UnicodeCategory.NonSpacingMark)
-                {
-                    stringBuilder.Append(character);
-                }
-            }
-
-            return stringBuilder
-                .ToString()
-                .Normalize(NormalizationForm.FormC);
         }
     }
 }

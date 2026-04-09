@@ -1,8 +1,9 @@
-﻿using BLL.Services.BouquetGeneration.BouquetPlanner.Dto;
+using BLL.Services.BouquetGeneration.BouquetPlanner.Dto;
 using BLL.Services.Colors;
 using BLL.Services.Flowers;
 using BLL.Services.OpenAi.Dto;
 using DAL.Models;
+using System.Linq;
 
 namespace BLL.Services.BouquetGeneration.BouquetPlanner
 {
@@ -23,27 +24,30 @@ namespace BLL.Services.BouquetGeneration.BouquetPlanner
             IReadOnlyCollection<ColorPreference> accentColors)
         {
             var flowers = await _flowerService.GetFlowersAsync();
+            var comparer = StringComparer.OrdinalIgnoreCase;
 
             var filteredFlowers = flowers.Where(flower =>
-                    aiStyleAdvice.Roles.Focal.Categories.Contains(flower.Category?.CategoryName) ||
-                    aiStyleAdvice.Roles.Semi.Categories.Contains(flower.Category?.CategoryName) ||
-                    aiStyleAdvice.Roles.Filler.Categories.Contains(flower.Category?.CategoryName) ||
-                    aiStyleAdvice.Roles.Greenery.Categories.Contains(flower.Category?.CategoryName)
-                )
-                .Where(f =>
-                    _colorMatchingService.ResolveColorScore(f.Color, primaryColors, 0.4).HasValue ||
-                    _colorMatchingService.ResolveColorScore(f.Color, accentColors, 0.2).HasValue
-                )
-                .ToList();
+                    aiStyleAdvice.Roles.Focal.Categories.Contains(flower.Category?.CategoryName, comparer) ||
+                    aiStyleAdvice.Roles.Semi.Categories.Contains(flower.Category?.CategoryName, comparer) ||
+                    aiStyleAdvice.Roles.Filler.Categories.Contains(flower.Category?.CategoryName, comparer) ||
+                    aiStyleAdvice.Roles.Greenery.Categories.Contains(flower.Category?.CategoryName, comparer)
+            )
+            .Where(f =>
+                aiStyleAdvice.Roles.Greenery.Categories.Contains(f.Category?.CategoryName, comparer) ||
+                _colorMatchingService.ResolveColorScore(f.Color, primaryColors, 0.4).HasValue ||
+                _colorMatchingService.ResolveColorScore(f.Color, accentColors, 0.2).HasValue
+            )
+            .ToList();
+            
 
             return filteredFlowers.Select(flower =>
             {
                 var role =
-                    aiStyleAdvice.Roles.Focal.Categories.Contains(flower.Category?.CategoryName)
+                    aiStyleAdvice.Roles.Focal.Categories.Contains(flower.Category?.CategoryName, comparer)
                         ? FlowerRole.Focal
-                        : aiStyleAdvice.Roles.Greenery.Categories.Contains(flower.Category?.CategoryName)
+                        : aiStyleAdvice.Roles.Greenery.Categories.Contains(flower.Category?.CategoryName, comparer)
                         ? FlowerRole.Greenery
-                        : aiStyleAdvice.Roles.Semi.Categories.Contains(flower.Category?.CategoryName)
+                        : aiStyleAdvice.Roles.Semi.Categories.Contains(flower.Category?.CategoryName, comparer)
                         ? FlowerRole.Semi
                         : FlowerRole.Filler;
 
@@ -61,6 +65,11 @@ namespace BLL.Services.BouquetGeneration.BouquetPlanner
             IReadOnlyCollection<ColorPreference> primaryColors,
             IReadOnlyCollection<ColorPreference> accentColors)
         {
+            if (role == FlowerRole.Greenery)
+            {
+                return 1.6;
+            }
+
             double harmony = 1.0;
 
             harmony += _colorMatchingService.ResolveColorScore(flower.Color, primaryColors, 0.4)
@@ -72,7 +81,7 @@ namespace BLL.Services.BouquetGeneration.BouquetPlanner
                 FlowerRole.Focal => 0.4,
                 FlowerRole.Filler => 0.2,
                 FlowerRole.Semi => 0.3,
-                FlowerRole.Greenery => 0.1,
+                FlowerRole.Greenery => 0,
                 _ => 0
             };
 
@@ -80,3 +89,7 @@ namespace BLL.Services.BouquetGeneration.BouquetPlanner
         }
     }
 }
+
+
+
+

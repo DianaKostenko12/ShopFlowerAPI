@@ -10,27 +10,13 @@ namespace BLL.Services.OpenAi.Utils
 {
     internal static class PromptBuilder
     {
-        private static readonly string[] AllowedShades =
-        [
-            "світлий",
-            "темний",
-            "теплий",
-            "холодний",
-            "пастельний",
-            "ніжний",
-            "яскравий",
-            "насичений",
-            "приглушений",
-            "нейтральний"
-        ];
-
-        internal static string BuildStylePrompt(GenerateBouquetDescriptor bouquet)
+        internal static string BuildStylePrompt(GenerateBouquetDescriptor bouquet, IReadOnlyCollection<string> allowedShades)
         {
             string bouquetColors = bouquet.Color is { Count: > 0 }
                 ? string.Join(", ", bouquet.Color)
-                : "не вказано";
+                : "РЅРµ РІРєР°Р·Р°РЅРѕ";
             string allowedBaseColors = string.Join(", ", BaseColorNormalizer.GetAllowedBaseColors());
-            string allowedShades = string.Join(", ", AllowedShades);
+            string allowedShadesText = string.Join(", ", allowedShades);
             string allowedWrappingTypes = string.Join(", ", Enum.GetNames<WrappingPaperType>());
             string allowedWrappingPatterns = string.Join(", ", Enum.GetNames<WrappingPaperPattern>());
 
@@ -56,7 +42,7 @@ namespace BLL.Services.OpenAi.Utils
                 Color rules:
                 - Every color must be an object with: baseColor, shade.
                 - baseColor must be one of: {{allowedBaseColors}}
-                - shade should be a short Ukrainian descriptor, preferably one of: {{allowedShades}}
+                - shade should be a short Ukrainian descriptor, preferably one of: {{allowedShadesText}}
                 - Convert specific shades to baseColor + shade.
                 - Example: бургунді -> червоний + темний
                 - Example: айворі -> білий + теплий
@@ -75,6 +61,14 @@ namespace BLL.Services.OpenAi.Utils
                 - Focal/Semi/Filler: max 2 categories each.
                 - Greenery: 1-3 categories.
                 - Flower categories and greenery names: Ukrainian.
+                - For flowers, return general flower categories that best fit the requested style.
+                - Category should describe the flower type/category, not a bouquet role, mood, or visual adjective.
+                - Example flower categories: "троянда", "півонія", "тюльпан", "лілія", "хризантема", "гортензія", "еустома", "гіпсофіла".
+                - These are only examples; you may return any other flower category if it matches the style better.
+                - Use only exact canonical category names in singular nominative form.
+                - Do not use plural, synonyms, or descriptive variations.
+                - Examples: "троянда", not "троянди"; "лілія", not "лілії"; "гіпсофіла", not "гіпсофіли"; "хризантема", not
+                "хризантеми".
                 - wrappingPaper colors should match the palette by meaning.
                 - Quantities must be realistic for the budget.
 
@@ -172,13 +166,13 @@ namespace BLL.Services.OpenAi.Utils
             return shape?.ToLowerInvariant() switch
             {
                 "кругла" =>
-                    "Round dome-shaped bouquet viewed from above as concentric circles. Perfectly symmetrical in all directions. Flat top, compact and full.",
-                "подовжена" =>
-                    "Wide crescent-shaped bouquet, much wider than it is deep. Front-facing half-moon silhouette with gently curving edges. Flowers at the tips angle outward, center flowers point straight up.",
+                    "Round bouquet with a soft dome shape, viewed from above at a slight angle. Naturally rounded silhouette with organic flower placement вЂ” not perfectly symmetrical. Blooms sit at slightly different heights, creating a gentle, pillowy dome.",
                 "асиметрична" =>
                     "Asymmetrical bouquet with one tall, lush dominant side and one low, restrained side. The dominant side rises noticeably higher with flowers leaning outward. The low side stays close to the base. Overall off-center, dynamic silhouette.",
+                "подовжена" =>
+                    "Elongated bouquet viewed from above at a slight angle. The flower arrangement is horizontally elongated вЂ” distinctly wider than it is tall, roughly 2:1 width-to-height ratio, with a soft oval shape. The bouquet is wrapped in decorative paper that gathers and tapers at the bottom, clearly showing this is a wrapped bouquet and not just a flat arrangement. The wrapping paper cradles the flowers and its gathered end is visible below the flower mass. Lush and compact flower dome on top, with the paper wrapper forming an elegant elongated frame around it.",
                 _ =>
-                    "Round dome-shaped bouquet viewed from above as concentric circles. Perfectly symmetrical in all directions. Flat top, compact and full."
+                    "Round bouquet with a soft dome shape, viewed from above at a slight angle. Naturally rounded silhouette with organic flower placement вЂ” not perfectly symmetrical. Blooms sit at slightly different heights, creating a gentle, pillowy dome."
             };
         }
 
@@ -192,19 +186,12 @@ namespace BLL.Services.OpenAi.Utils
             {
                 "кругла" =>
                     """
-                    - One focal flower sits at the exact center of the bouquet.
-                    - Additional focal flowers form a tight first ring around the center.
-                    - Semi, filler, and greenery flowers are evenly mixed in alternating concentric rings radiating outward.
-                    - Each ring has uniform spacing between flowers.
-                    - All flowers point straight up with no tilt, creating a flat dome profile.
-                    """,
-                "подовжена" =>
-                    """
-                    - Focal flowers form the central spine running along the crescent arc.
-                    - Other flowers fill outward in elliptical layers, with width growing much faster than depth.
-                    - The bouquet spreads wide left-to-right but stays shallow front-to-back.
-                    - Flowers near the crescent tips tilt outward up to 30 degrees.
-                    - Center flowers stand upright.
+                    - Focal flowers are clustered near the center, slightly offset from one another вЂ” never in a perfect grid or ring.
+                    - Semi and filler flowers nestle organically around the focals, filling space naturally with slight overlaps.
+                    - Flowers tilt gently inward toward the center (2-10В°), creating a soft, rounded dome profile.
+                    - Small natural gaps between blooms where greenery and tiny filler flowers peek through.
+                    - Overall silhouette is round but with the gentle irregularity of a hand-tied arrangement.
+                    - No strict concentric rings вЂ” placement should feel organic, as if arranged by a skilled florist.
                     """,
                 "асиметрична" =>
                     """
@@ -213,6 +200,17 @@ namespace BLL.Services.OpenAi.Utils
                     - The entire composition shifts to one side, creating a deliberate off-center look.
                     - On the dominant side, flowers rise progressively higher and lean outward at steeper angles.
                     - On the low side, flowers stay close to the base with minimal tilt.
+                    """,
+                "подовжена" =>
+                    """
+                    - The flower area forms a horizontally elongated oval, wider than it is tall.
+                    - Focal flowers are spaced along the central horizontal axis of the bouquet.
+                    - Semi and filler flowers fill the space between and around focal flowers, following the elongated contour.
+                    - Flowers near the left and right edges are smaller and tilt slightly outward along the horizontal axis.
+                    - The widest point of the flower mass is at the center, narrowing gently toward the left and right ends.
+                    - Below the flowers, the wrapping paper gathers into a tapered point, making it clear this is a bouquet, not a flat shape.
+                    - Greenery and filler peek naturally between blooms, softening the edges.
+                    - The overall shape should clearly read as an elongated wrapped bouquet вЂ” not a boat, leaf, or standalone flat arrangement.
                     """,
                 _ =>
                     """
@@ -290,3 +288,4 @@ namespace BLL.Services.OpenAi.Utils
         }
     }
 }
+

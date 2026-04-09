@@ -1,4 +1,5 @@
-﻿using BLL.Services.BouquetGeneration.BouquetPlanner.Dto;
+using BLL.Services.BouquetGeneration.BouquetPlanner.Dto;
+using BLL.Services.Colors;
 using BLL.Services.BouquetGeneration.Descriptors;
 using BLL.Services.OpenAi.Dto;
 using BLL.Services.OpenAi.OpenAiClient;
@@ -10,14 +11,24 @@ namespace BLL.Services.OpenAi
     public class OpenAIService : IOpenAIService
     {
         private readonly IOpenAiClient _openAiClient;
-        public OpenAIService(IOpenAiClient openAiClient)
+        private readonly IColorService _colorService;
+
+        public OpenAIService(IOpenAiClient openAiClient, IColorService colorService)
         {
             _openAiClient = openAiClient;
+            _colorService = colorService;
         }
 
         public async Task<GptStyleRecommendation> GenerateBouquetDescriptionAsync(GenerateBouquetDescriptor descriptor, CancellationToken cancellationToken = default)
         {
-            var prompt = PromptBuilder.BuildStylePrompt(descriptor);
+            var allowedShades = (await _colorService.GetColorsAsync())
+                .Select(color => color.Shade?.Trim())
+                .Where(shade => !string.IsNullOrWhiteSpace(shade))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(shade => shade)
+                .ToList();
+
+            var prompt = PromptBuilder.BuildStylePrompt(descriptor, allowedShades);
 
             var response = await _openAiClient.GenerateTextAsync(prompt, "text");
 
@@ -36,3 +47,4 @@ namespace BLL.Services.OpenAi
         }
     }
 }
+
