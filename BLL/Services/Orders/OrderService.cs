@@ -41,16 +41,22 @@ namespace BLL.Services.Orders
 
             if (descriptor.Bouquets != null && descriptor.Bouquets.Any())
             {
+                var demand = await BuildFlowerDemandAsync(descriptor.Bouquets);
+
+                foreach (var (flowerId, required) in demand)
+                {
+                    var flower = await _uow.FlowerRepository.FindAsync(flowerId);
+                    if (flower == null || flower.FlowerCount < required)
+                    {
+                        throw new BusinessException(HttpStatusCode.BadRequest,
+                            "Замовлення неможливо оформити.");
+                    }
+                }
+
                 List<OrderBouquet> newOrderBouquets = new List<OrderBouquet>();
 
                 foreach (var bouquet in descriptor.Bouquets)
                 {
-                    var bouquetExists = await _uow.BouquetRepository.GetBouquetByIdAsync(bouquet.BouquetId);
-                    if(bouquetExists == null)
-                    {
-                        throw new ArgumentException($"Bouquet with ID {bouquet.BouquetId} does not exist.");
-                    }
-
                     newOrderBouquets.Add(new OrderBouquet()
                     {
                         Order = newOrder,
@@ -64,6 +70,32 @@ namespace BLL.Services.Orders
 
             await _uow.CompleteAsync();
             return newOrder.OrderId;
+        }
+
+        private async Task<Dictionary<int, int>> BuildFlowerDemandAsync(
+            IEnumerable<BouquetQuantityDescriptor> bouquets)
+        {
+            var demand = new Dictionary<int, int>();
+
+            foreach (var item in bouquets)
+            {
+                var bouquet = await _uow.BouquetRepository.GetBouquetWithFlowersAsync(item.BouquetId);
+                if (bouquet == null)
+                {
+                    throw new ArgumentException($"Bouquet with ID {item.BouquetId} does not exist.");
+                }
+
+                foreach (var bf in bouquet.BouquetsFlowers)
+                {
+                    var required = bf.FlowerCount * item.BouquetCount;
+                    if (demand.ContainsKey(bf.FlowerId))
+                        demand[bf.FlowerId] += required;
+                    else
+                        demand[bf.FlowerId] = required;
+                }
+            }
+
+            return demand;
         }
 
         public async Task ChangeOrderStatus(int orderId, OrderStatus status)
@@ -124,6 +156,16 @@ namespace BLL.Services.Orders
                 {
                     allAssembled = false;
                     break;
+                }
+            }
+
+            if (allAssembled)
+            {
+                var demand = await BuildFlowerDemandAsync(bouquets);
+                foreach (var (flowerId, required) in demand)
+                {
+                    var flower = await _uow.FlowerRepository.FindAsync(flowerId);
+                    flower.FlowerCount -= required;
                 }
             }
 
