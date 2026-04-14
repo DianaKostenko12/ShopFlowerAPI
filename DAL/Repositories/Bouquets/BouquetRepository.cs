@@ -63,10 +63,10 @@ namespace DAL.Repositories.Bouquets
                     b.BouquetsFlowers.Sum(bf => bf.Flower.FlowerCost * bf.FlowerCount) <= view.MaxPrice);
             }
 
-            if (view.FlowerIds != null && view.FlowerIds.Any())
+            if (view.CategoriesIds != null && view.CategoriesIds.Any())
             {
                 query = query.Where(b => b.BouquetsFlowers
-                    .Any(bf => view.FlowerIds.Contains(bf.FlowerId)));
+                    .Any(bf => view.CategoriesIds.Contains(bf.Flower.CategoryId)));
             }
 
             return await query.ToListAsync();

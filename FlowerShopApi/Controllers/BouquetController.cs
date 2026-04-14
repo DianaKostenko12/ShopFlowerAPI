@@ -82,13 +82,13 @@ namespace FlowerShopApi.Controllers
             }
         }
 
-        [HttpGet("{id}/image")]
-        public async Task<IActionResult> GetBouquetImageAsync(int id)
+        [HttpGet("{bouquetId}/image")]
+        public async Task<IActionResult> GetBouquetImageAsync(int bouquetId)
         {
-            var bouquet = await _bouquetService.GetBouquetByIdAsync(id);
+            var bouquet = await _bouquetService.GetBouquetByIdAsync(bouquetId);
             if (bouquet == null)
             {
-                return NotFound(new { Message = $"Bouquet with ID {id} was not found." });
+                return NotFound(new { Message = $"Bouquet with ID {bouquetId} was not found." });
             }
 
             if (bouquet.PhotoBytes != null && bouquet.PhotoBytes.Length > 0)
@@ -122,12 +122,29 @@ namespace FlowerShopApi.Controllers
         }
 
         [HttpPost("filter")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetBouquetsByFilterAsync([FromBody] BouquetFilterView view)
         {
             try
             {
+                var bouquets = await _bouquetService.GetBouquetsByFilterAsync(view, null);
+                var bouquetsDto = _mapper.Map<List<GetBouquetResponse>>(bouquets);
+                return Ok(bouquetsDto);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
+        [HttpPost("filter/my")]
+        [Authorize]
+        public async Task<IActionResult> GetMyBouquetsByFilterAsync([FromBody] BouquetFilterView view)
+        {
+            try
+            {
                 int? userId = _httpContextAccessor.HttpContext.User.GetUserId();
-                var bouquets = await _bouquetService.GetBouquetsByFilterAsync(view, userId);
+                var bouquets = await _bouquetService.GetBouquetsByFilterAsync(view, userId.Value);
                 var bouquetsDto = _mapper.Map<List<GetBouquetResponse>>(bouquets);
                 return Ok(bouquetsDto);
             }

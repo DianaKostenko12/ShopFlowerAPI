@@ -7,9 +7,9 @@
         public int FlowerCount { get; set; }
         public decimal FlowerCost { get; set; }
         public string PhotoFileName { get; set; }
-        public int? ColorId { get; set; }
+        public int ColorId { get; set; }
         public Color Color { get; set; }
-        public int? CategoryId { get; set; }
+        public int CategoryId { get; set; }
         public Category Category { get; set; }
         public int HeadSizeCm { get; set; }
         public double StemThicknessMm { get; set; }

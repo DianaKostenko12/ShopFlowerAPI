@@ -1,5 +1,6 @@
-using AutoMapper;
+ï»¿using AutoMapper;
 using BLL.Services.Bouquets.Descriptors;
+using BLL.Services.Colors;
 using BLL.Services.FileStorage;
 using DAL.Data.UnitOfWork;
 using DAL.Exceptions;
@@ -129,12 +130,12 @@ namespace BLL.Services.Bouquets
 
             if (recordAuthorRoles.Contains(Roles.Admin) && !editorRoles.Contains(Roles.Admin))
             {
-                throw new BusinessException(HttpStatusCode.Forbidden, "Âè íå ìàºòå ïðàâà");
+                throw new BusinessException(HttpStatusCode.Forbidden, "Ð’Ð¸ Ð½Ðµ Ð¼Ð°Ñ”Ñ‚Ðµ Ð¿Ñ€Ð°Ð²Ð°");
             }
 
             if (!recordAuthorRoles.Contains(Roles.Admin) && !editorRoles.Contains(Roles.Admin) && recordAuthor.Id != editor.Id)
             {
-                throw new BusinessException(HttpStatusCode.Forbidden, "Âè íå ìàºòå ïðàâà");
+                throw new BusinessException(HttpStatusCode.Forbidden, "Ð’Ð¸ Ð½Ðµ Ð¼Ð°Ñ”Ñ‚Ðµ Ð¿Ñ€Ð°Ð²Ð°");
             }
 
             await _uow.BouquetRepository.RemoveAsync(bouquetToDelete);
@@ -158,7 +159,7 @@ namespace BLL.Services.Bouquets
 
         public async Task<List<Bouquet>> GetBouquetsByFilterAsync(BouquetFilterView view, int? userId)
         {
-            List<Bouquet> bouquets =  await _uow.BouquetRepository.GetBouquetsByFilterAsync(view);
+            List<Bouquet> bouquets = await _uow.BouquetRepository.GetBouquetsByFilterAsync(view);
             List<Bouquet> filterBouquets = new List<Bouquet>();
             foreach (var bouquet in bouquets)
             {
@@ -170,7 +171,7 @@ namespace BLL.Services.Bouquets
                 }
             }
 
-            if(userId.HasValue)
+            if (userId.HasValue)
             {
                 foreach (var bouquet in bouquets)
                 {
@@ -181,7 +182,56 @@ namespace BLL.Services.Bouquets
                 }
             }
 
-            return filterBouquets.DistinctBy(x => x.BouquetId).ToList();
+            var visibleBouquets = filterBouquets
+                .DistinctBy(x => x.BouquetId)
+                .ToList();
+
+            if (view?.ShapesList != null && view.ShapesList.Any())
+            {
+                var requestedShapes = view.ShapesList
+                    .Where(shape => !string.IsNullOrWhiteSpace(shape))
+                    .Select(shape => shape.Trim())
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+                visibleBouquets = visibleBouquets
+                    .Where(bouquet => !string.IsNullOrWhiteSpace(bouquet.Shape)
+                        && requestedShapes.Contains(bouquet.Shape.Trim()))
+                    .ToList();
+            }
+
+            if (view?.ColorsList == null || !view.ColorsList.Any())
+            {
+                return visibleBouquets;
+            }
+
+            var relatedColors = view.ColorsList
+                .SelectMany(BaseColorNormalizer.GetRelatedColors)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            var requestedBaseColors = view.ColorsList
+                .Select(BaseColorNormalizer.Normalize)
+                .Where(color => !string.IsNullOrWhiteSpace(color))
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            if (relatedColors.Count == 0 && requestedBaseColors.Count == 0)
+            {
+                return visibleBouquets;
+            }
+
+            return visibleBouquets
+                .Where(bouquet => bouquet.BouquetsFlowers.Any(bf =>
+                {
+                    var colorName = bf.Flower?.Color?.ColorName?.Trim();
+                    if (string.IsNullOrWhiteSpace(colorName))
+                    {
+                        return false;
+                    }
+
+                    return relatedColors.Contains(colorName)
+                        || requestedBaseColors.Contains(BaseColorNormalizer.Normalize(colorName));
+                }))
+                .ToList();
         }
 
         public async Task<bool> IsUserBouquetOwnerAsync(int bouquetId, int userId)
