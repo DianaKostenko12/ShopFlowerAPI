@@ -73,6 +73,7 @@ namespace DAL.Data
                 entity.HasKey(e => e.WrappingPaperId);
                 entity.Property(e => e.Type).HasConversion<int>();
                 entity.Property(e => e.Pattern).HasConversion<int>();
+                entity.Property(e => e.IsAvailable).HasDefaultValue(true);
 
                 entity.HasOne(e => e.Color)
                       .WithMany()

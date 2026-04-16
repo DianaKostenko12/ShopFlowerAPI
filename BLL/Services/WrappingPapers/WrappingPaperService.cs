@@ -26,6 +26,19 @@ namespace BLL.Services.WrappingPapers
                 throw new KeyNotFoundException($"Color with ID {wrappingPaper.ColorId} was not found.");
             }
 
+            var existingWrappingPaper = await _uow.WrappingPaperRepository.FindByVariantAsync(
+                wrappingPaper.Type,
+                wrappingPaper.ColorId,
+                wrappingPaper.Pattern);
+
+            if (existingWrappingPaper != null)
+            {
+                existingWrappingPaper.IsAvailable = true;
+                await _uow.CompleteAsync();
+                return;
+            }
+
+            wrappingPaper.IsAvailable = true;
             await _uow.WrappingPaperRepository.AddAsync(wrappingPaper);
             await _uow.CompleteAsync();
         }
@@ -33,6 +46,18 @@ namespace BLL.Services.WrappingPapers
         public async Task<IEnumerable<WrappingPaper>> GetWrappingPapersAsync()
         {
             return await _uow.WrappingPaperRepository.FindAllAsync();
+        }
+
+        public async Task DeleteWrappingPaperAsync(int wrappingPaperId)
+        {
+            var wrappingPaper = await _uow.WrappingPaperRepository.FindAsync(wrappingPaperId);
+            if (wrappingPaper == null)
+            {
+                throw new KeyNotFoundException($"Wrapping paper with ID {wrappingPaperId} was not found.");
+            }
+
+            wrappingPaper.IsAvailable = false;
+            await _uow.CompleteAsync();
         }
 
         public async Task<WrappingPaper> SelectBestMatchAsync(

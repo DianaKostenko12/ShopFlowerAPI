@@ -7,6 +7,7 @@ namespace BLL.Services.WrappingPapers
     {
         Task AddWrappingPaperAsync(WrappingPaper wrappingPaper);
         Task<IEnumerable<WrappingPaper>> GetWrappingPapersAsync();
+        Task DeleteWrappingPaperAsync(int wrappingPaperId);
         Task<WrappingPaper> SelectBestMatchAsync(
             IEnumerable<ColorPreference> requestedColors, string pattern, string type);
     }

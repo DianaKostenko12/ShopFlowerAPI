@@ -33,5 +33,12 @@ namespace FlowerShopApi.Controllers
 
             return Ok("Successfully created");
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteWrappingPaper(int id)
+        {
+            await _wrappingPaperService.DeleteWrappingPaperAsync(id);
+            return Ok("Wrapping paper successfully deleted.");
+        }
     }
 }

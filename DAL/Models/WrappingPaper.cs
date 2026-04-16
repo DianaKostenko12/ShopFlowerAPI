@@ -9,5 +9,6 @@ namespace DAL.Models
         public int ColorId { get; set; }
         public Color Color { get; set; }
         public WrappingPaperPattern Pattern { get; set; }
+        public bool IsAvailable { get; set; } = true;
     }
 }
