@@ -29,9 +29,9 @@ namespace FlowerShopApi.Controllers
         public async Task<IActionResult> AddWrappingPaper([FromBody] CreateWrappingPaperRequest request)
         {
             var wrappingPaper = _mapper.Map<WrappingPaper>(request);
-            await _wrappingPaperService.AddWrappingPaperAsync(wrappingPaper);
+            var createdWrappingPaper = await _wrappingPaperService.AddWrappingPaperAsync(wrappingPaper);
 
-            return Ok("Successfully created");
+            return Ok(_mapper.Map<WrappingPaperResponse>(createdWrappingPaper));
         }
 
         [HttpDelete("{id}")]

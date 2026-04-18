@@ -5,7 +5,7 @@ namespace BLL.Services.WrappingPapers
 {
     public interface IWrappingPaperService
     {
-        Task AddWrappingPaperAsync(WrappingPaper wrappingPaper);
+        Task<WrappingPaper> AddWrappingPaperAsync(WrappingPaper wrappingPaper);
         Task<IEnumerable<WrappingPaper>> GetWrappingPapersAsync();
         Task DeleteWrappingPaperAsync(int wrappingPaperId);
         Task<WrappingPaper> SelectBestMatchAsync(

@@ -16,7 +16,7 @@ namespace BLL.Services.WrappingPapers
             _colorMatchingService = colorMatchingService;
         }
 
-        public async Task AddWrappingPaperAsync(WrappingPaper wrappingPaper)
+        public async Task<WrappingPaper> AddWrappingPaperAsync(WrappingPaper wrappingPaper)
         {
             ArgumentNullException.ThrowIfNull(wrappingPaper);
 
@@ -35,12 +35,15 @@ namespace BLL.Services.WrappingPapers
             {
                 existingWrappingPaper.IsAvailable = true;
                 await _uow.CompleteAsync();
-                return;
+                return existingWrappingPaper;
             }
 
             wrappingPaper.IsAvailable = true;
+            wrappingPaper.Color = color;
             await _uow.WrappingPaperRepository.AddAsync(wrappingPaper);
             await _uow.CompleteAsync();
+
+            return wrappingPaper;
         }
 
         public async Task<IEnumerable<WrappingPaper>> GetWrappingPapersAsync()

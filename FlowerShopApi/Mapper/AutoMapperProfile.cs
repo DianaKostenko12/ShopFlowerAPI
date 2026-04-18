@@ -43,8 +43,7 @@ namespace FlowerShopApi.Mapper
             CreateMap<CreateColorRequest, Color>();
 
             CreateMap<WrappingPaper, WrappingPaperResponse>()
-                .ForMember(dest => dest.ColorName, opt => opt.MapFrom(src => src.Color != null ? src.Color.ColorName : null))
-                .ForMember(dest => dest.ColorShade, opt => opt.MapFrom(src => src.Color != null ? src.Color.Shade : null));
+                .ForMember(dest => dest.ColorName, opt => opt.MapFrom(src => src.Color != null ? src.Color.ColorName : null));
             CreateMap<CreateWrappingPaperRequest, WrappingPaper>();
 
             CreateMap<FlowerQuantityRequest, FlowerQuantityDescriptor>();
