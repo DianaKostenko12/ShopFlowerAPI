@@ -1,6 +1,7 @@
-﻿using BLL.Services.BouquetGeneration;
+using BLL.Services.BouquetGeneration;
 using BLL.Services.BouquetGeneration.Descriptors;
 using FlowerShopApi.DTOs.AIGeneratedBouquets;
+using FlowerShopApi.Services.AIGeneratedBouquets;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,10 +12,16 @@ namespace FlowerShopApi.Controllers
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IBouquetGenerationService _bouquetGenerationService;
-        public AIGeneratedBouquetController(IHttpContextAccessor httpContextAccessor, IBouquetGenerationService bouquetGenerationService)
+        private readonly IAIGeneratedBouquetResponseService _aiGeneratedBouquetResponseService;
+
+        public AIGeneratedBouquetController(
+            IHttpContextAccessor httpContextAccessor,
+            IBouquetGenerationService bouquetGenerationService,
+            IAIGeneratedBouquetResponseService aiGeneratedBouquetResponseService)
         {
             _httpContextAccessor = httpContextAccessor;
             _bouquetGenerationService = bouquetGenerationService;
+            _aiGeneratedBouquetResponseService = aiGeneratedBouquetResponseService;
         }
 
         [HttpPost, Authorize]
@@ -24,7 +31,9 @@ namespace FlowerShopApi.Controllers
             {
                 GenerateBouquetDescriptor descriptor = new(request.Color, request.Budget, request.Style, request.Shape, request.AdditionalComment);
                 var generatedAIBouquet = await _bouquetGenerationService.GenerateBouquetAsync(descriptor);
-                return Ok(generatedAIBouquet);
+                var response = _aiGeneratedBouquetResponseService.BuildResponse(generatedAIBouquet);
+
+                return Ok(response);
             }
             catch (Exception ex)
             {
