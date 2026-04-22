@@ -5,7 +5,7 @@ namespace FlowerShopApi.DTOs.AIGeneratedBouquets
 {
     public record BouquetCompositionItem
     (
-        Flower Flower,
+        int FlowerId,
         FlowerRole FlowerRole,
         int Quantity
     );

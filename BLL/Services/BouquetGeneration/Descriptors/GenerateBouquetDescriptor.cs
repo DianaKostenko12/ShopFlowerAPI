@@ -1,7 +1,9 @@
-﻿namespace BLL.Services.BouquetGeneration.Descriptors
+using BLL.Services.OpenAi.Dto;
+
+namespace BLL.Services.BouquetGeneration.Descriptors
 {
     public record GenerateBouquetDescriptor(
-         List<string> Color,
+         List<ColorPreference> Color,
          decimal Budget,
          string Style,
          string Shape,

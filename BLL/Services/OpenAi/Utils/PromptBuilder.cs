@@ -13,7 +13,7 @@ namespace BLL.Services.OpenAi.Utils
         internal static string BuildStylePrompt(GenerateBouquetDescriptor bouquet, IReadOnlyCollection<string> allowedShades)
         {
             string bouquetColors = bouquet.Color is { Count: > 0 }
-                ? string.Join(", ", bouquet.Color)
+                ? string.Join(", ", bouquet.Color.Select(FormatColorPreference))
                 : "РЅРµ РІРєР°Р·Р°РЅРѕ";
             string allowedBaseColors = string.Join(", ", BaseColorNormalizer.GetAllowedBaseColors());
             string allowedShadesText = string.Join(", ", allowedShades);
@@ -174,6 +174,21 @@ namespace BLL.Services.OpenAi.Utils
                 _ =>
                     "Round bouquet with a soft dome shape, viewed from above at a slight angle. Naturally rounded silhouette with organic flower placement вЂ” not perfectly symmetrical. Blooms sit at slightly different heights, creating a gentle, pillowy dome."
             };
+        }
+
+        private static string FormatColorPreference(OpenAi.Dto.ColorPreference colorPreference)
+        {
+            if (colorPreference == null)
+            {
+                return string.Empty;
+            }
+
+            if (string.IsNullOrWhiteSpace(colorPreference.Shade))
+            {
+                return colorPreference.BaseColor ?? string.Empty;
+            }
+
+            return $"{colorPreference.BaseColor} ({colorPreference.Shade})";
         }
 
         private static string BuildArrangementRules(string shape, bool hasGreenery)

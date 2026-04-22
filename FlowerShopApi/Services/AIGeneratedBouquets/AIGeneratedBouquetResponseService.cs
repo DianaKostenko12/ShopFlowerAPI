@@ -16,7 +16,7 @@ namespace FlowerShopApi.Services.AIGeneratedBouquets
                 BuildBouquetDescription(bouquetDetails),
                 bouquetDetails.FlowerComposition
                     .Select(flower => new BouquetCompositionItem(
-                        flower.flower,
+                        flower.flower.FlowerId,
                         flower.Role,
                         flower.Quantity))
                     .ToList(),

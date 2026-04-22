@@ -1,8 +1,8 @@
-﻿namespace FlowerShopApi.DTOs.AIGeneratedBouquets
+namespace FlowerShopApi.DTOs.AIGeneratedBouquets
 {
     public record GenerateAIBouquetRequest
     (
-         List<string> Color,
+         List<RequestedBouquetColorDto> Color,
          decimal Budget,
          string Style,
          string Shape,

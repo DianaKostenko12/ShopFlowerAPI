@@ -1,5 +1,6 @@
 using BLL.Services.BouquetGeneration;
 using BLL.Services.BouquetGeneration.Descriptors;
+using BLL.Services.OpenAi.Dto;
 using FlowerShopApi.DTOs.AIGeneratedBouquets;
 using FlowerShopApi.Services.AIGeneratedBouquets;
 using Microsoft.AspNetCore.Authorization;
@@ -29,7 +30,12 @@ namespace FlowerShopApi.Controllers
         {
             try
             {
-                GenerateBouquetDescriptor descriptor = new(request.Color, request.Budget, request.Style, request.Shape, request.AdditionalComment);
+                var requestedColors = request.Color?
+                    .Select(color => new ColorPreference(color.BaseColor, color.Shade))
+                    .ToList()
+                    ?? [];
+
+                GenerateBouquetDescriptor descriptor = new(requestedColors, request.Budget, request.Style, request.Shape, request.AdditionalComment);
                 var generatedAIBouquet = await _bouquetGenerationService.GenerateBouquetAsync(descriptor);
                 var response = _aiGeneratedBouquetResponseService.BuildResponse(generatedAIBouquet);
 
