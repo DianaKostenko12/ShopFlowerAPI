@@ -6,31 +6,28 @@ namespace BLL.Services.BouquetGeneration.BouquetPlanner.FlowerComposition
 {
     public sealed class FlowerCompositionBuilder : IFlowerCompositionBuilder
     {
+        private static readonly IReadOnlyDictionary<FlowerRole, decimal> RoleBudgetProportions = new Dictionary<FlowerRole, decimal>
+        {
+            { FlowerRole.Focal, 0.4m },
+            { FlowerRole.Semi, 0.3m },
+            { FlowerRole.Filler, 0.2m },
+            { FlowerRole.Greenery, 0.1m }
+        };
+
+        private static readonly IReadOnlyDictionary<FlowerRole, decimal> RoleQuantityPriorities = new Dictionary<FlowerRole, decimal>
+        {
+            { FlowerRole.Focal, 0.55m },
+            { FlowerRole.Semi, 0.95m },
+            { FlowerRole.Filler, 1.25m },
+            { FlowerRole.Greenery, 0.75m }
+        };
+
         public List<Dto.FlowerComposition> BuildFlowersComposition(List<FlowerWithRole> flowersWithRole, GptStyleRecommendation aiStyleRecommendation, decimal totalBudget)
         {
             List<Dto.FlowerComposition> completedСomposition = new();
 
-            var roleBudgetProportions = new Dictionary<FlowerRole, decimal>
+            foreach (var role in RoleBudgetProportions.Keys)
             {
-                { FlowerRole.Focal, 0.4m },
-                { FlowerRole.Semi, 0.3m },
-                { FlowerRole.Filler, 0.2m },
-                { FlowerRole.Greenery, 0.1m }
-            };
-
-            foreach (var role in roleBudgetProportions.Keys)
-            {
-                decimal roleBudget = totalBudget * roleBudgetProportions[role];
-
-                var (minQuantity, maxQuantity) = role switch
-                {
-                    FlowerRole.Focal => (aiStyleRecommendation.Roles.Focal.Min, aiStyleRecommendation.Roles.Focal.Max),
-                    FlowerRole.Semi => (aiStyleRecommendation.Roles.Semi.Min, aiStyleRecommendation.Roles.Semi.Max),
-                    FlowerRole.Filler => (aiStyleRecommendation.Roles.Filler.Min, aiStyleRecommendation.Roles.Filler.Max),
-                    FlowerRole.Greenery => (aiStyleRecommendation.Roles.Greenery.Min, aiStyleRecommendation.Roles.Greenery.Max),
-                    _ => throw new ArgumentOutOfRangeException(nameof(role))
-                };
-
                 var flowerCandidates = flowersWithRole
                     .Where(f => f.Role == role)
                     .OrderByDescending(f => (decimal)f.Harmony / f.Flower.FlowerCost)
@@ -41,10 +38,22 @@ namespace BLL.Services.BouquetGeneration.BouquetPlanner.FlowerComposition
                     continue;
                 }
 
+                decimal roleBudget = totalBudget * RoleBudgetProportions[role];
+                int minQuantity = GetRoleMinQuantity(aiStyleRecommendation, role);
+                int maxQuantity = GetBudgetDrivenMaxQuantity(flowerCandidates, roleBudget, minQuantity);
+
+                if (maxQuantity < minQuantity)
+                {
+                    continue;
+                }
+
                 if (role == FlowerRole.Focal)
                 {
                     var focalRoleComposition = ComposeFlowersForFocalRole(flowerCandidates, roleBudget, maxQuantity, minQuantity);
-                    completedСomposition.Add(focalRoleComposition);
+                    if (focalRoleComposition.flower != null && focalRoleComposition.Quantity > 0)
+                    {
+                        completedСomposition.Add(focalRoleComposition);
+                    }
                 }
                 else
                 {
@@ -52,6 +61,8 @@ namespace BLL.Services.BouquetGeneration.BouquetPlanner.FlowerComposition
                     completedСomposition.AddRange(roleComposition);
                 }
             }
+
+            FillRemainingBudget(completedСomposition, flowersWithRole, totalBudget);
 
             return completedСomposition;
         }
@@ -102,7 +113,9 @@ namespace BLL.Services.BouquetGeneration.BouquetPlanner.FlowerComposition
 
             var bestCompositionStates = compositionStates
                 .Where(s => s.Key.Quantity >= minQuantity && s.Key.Quantity <= maxQuantity)
-                .OrderByDescending(s => s.Value.Harmony)
+                .OrderByDescending(s => s.Key.Quantity)
+                .ThenByDescending(s => s.Key.Cost)
+                .ThenByDescending(s => s.Value.Harmony)
                 .FirstOrDefault();
 
             if (bestCompositionStates.Value.SelectedFlowerQuantities != null)
@@ -126,6 +139,8 @@ namespace BLL.Services.BouquetGeneration.BouquetPlanner.FlowerComposition
         {
             double bestHarmonyScore = -1;
             var roleComposition = new Dto.FlowerComposition(null, default, 0, 0);
+            var bestQuantity = 0;
+            var bestCost = 0m;
 
             foreach (var flowerCandidate in flowers)
             {
@@ -142,8 +157,12 @@ namespace BLL.Services.BouquetGeneration.BouquetPlanner.FlowerComposition
 
                     double harmonyScore = quantity * flowerCandidate.Harmony;
 
-                    if (harmonyScore > bestHarmonyScore)
+                    if (quantity > bestQuantity
+                        || (quantity == bestQuantity && cost > bestCost)
+                        || (quantity == bestQuantity && cost == bestCost && harmonyScore > bestHarmonyScore))
                     {
+                        bestQuantity = quantity;
+                        bestCost = cost;
                         bestHarmonyScore = harmonyScore;
                         roleComposition = new Dto.FlowerComposition
                         (
@@ -157,6 +176,91 @@ namespace BLL.Services.BouquetGeneration.BouquetPlanner.FlowerComposition
             }
 
             return roleComposition;
+        }
+
+        private static int GetRoleMinQuantity(GptStyleRecommendation aiStyleRecommendation, FlowerRole role)
+        {
+            return role switch
+            {
+                FlowerRole.Focal => aiStyleRecommendation.Roles.Focal.Min,
+                FlowerRole.Semi => aiStyleRecommendation.Roles.Semi.Min,
+                FlowerRole.Filler => aiStyleRecommendation.Roles.Filler.Min,
+                FlowerRole.Greenery => aiStyleRecommendation.Roles.Greenery.Min,
+                _ => throw new ArgumentOutOfRangeException(nameof(role))
+            };
+        }
+
+        private static int GetBudgetDrivenMaxQuantity(List<FlowerWithRole> flowers, decimal roleBudget, int minQuantity)
+        {
+            var cheapestFlowerCost = flowers.Min(f => f.Flower.FlowerCost);
+            if (cheapestFlowerCost <= 0)
+            {
+                return minQuantity;
+            }
+
+            return Math.Max(minQuantity, (int)(roleBudget / cheapestFlowerCost));
+        }
+
+        private static void FillRemainingBudget(
+            List<Dto.FlowerComposition> completedComposition,
+            List<FlowerWithRole> flowersWithRole,
+            decimal totalBudget)
+        {
+            if (completedComposition.Count == 0)
+            {
+                return;
+            }
+
+            decimal spentBudget = completedComposition.Sum(item => item.UnitPrice);
+            decimal remainingBudget = totalBudget - spentBudget;
+
+            while (remainingBudget > 0)
+            {
+                var currentRoleQuantities = completedComposition
+                    .GroupBy(item => item.Role)
+                    .ToDictionary(group => group.Key, group => group.Sum(item => item.Quantity));
+
+                var nextFlower = flowersWithRole
+                    .Where(candidate =>
+                        candidate.Flower.FlowerCost <= remainingBudget)
+                    .OrderByDescending(candidate => GetBudgetFillPriority(candidate, currentRoleQuantities))
+                    .ThenBy(candidate => candidate.Flower.FlowerCost)
+                    .FirstOrDefault();
+
+                if (nextFlower == null)
+                {
+                    break;
+                }
+
+                var existingItemIndex = completedComposition.FindIndex(item => item.flower.FlowerId == nextFlower.Flower.FlowerId);
+                if (existingItemIndex >= 0)
+                {
+                    var existingItem = completedComposition[existingItemIndex];
+                    completedComposition[existingItemIndex] = existingItem with
+                    {
+                        Quantity = existingItem.Quantity + 1,
+                        UnitPrice = existingItem.UnitPrice + nextFlower.Flower.FlowerCost
+                    };
+                }
+                else
+                {
+                    completedComposition.Add(new Dto.FlowerComposition(
+                        nextFlower.Flower,
+                        nextFlower.Role,
+                        1,
+                        nextFlower.Flower.FlowerCost));
+                }
+
+                remainingBudget -= nextFlower.Flower.FlowerCost;
+            }
+        }
+
+        private static decimal GetBudgetFillPriority(FlowerWithRole candidate, IReadOnlyDictionary<FlowerRole, int> currentRoleQuantities)
+        {
+            var currentRoleQuantity = currentRoleQuantities.GetValueOrDefault(candidate.Role);
+            var quantityNeedFactor = RoleQuantityPriorities.GetValueOrDefault(candidate.Role, 1m) / (currentRoleQuantity + 1m);
+
+            return ((decimal)candidate.Harmony / candidate.Flower.FlowerCost) * quantityNeedFactor;
         }
     }
 }

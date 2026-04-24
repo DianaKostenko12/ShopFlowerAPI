@@ -71,6 +71,10 @@ namespace BLL.Services.OpenAi.Utils
                 "хризантеми".
                 - wrappingPaper colors should match the palette by meaning.
                 - Quantities must be realistic for the budget.
+                - roles.*.min is a required starting baseline for each role.
+                - roles.*.max is a soft abundance hint, not a hard ceiling.
+                - Use max only to show relative density: focal should usually be lower, semi medium, filler higher, greenery medium or lower than filler.
+                - Prefer broad ranges that help the planner spend the budget naturally instead of tiny hard limits.
 
                 Before returning, verify:
                 - JSON is valid.
