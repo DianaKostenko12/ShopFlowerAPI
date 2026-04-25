@@ -66,6 +66,14 @@ namespace FlowerShopApi.Controllers
             return Ok(new { Message = "Bouquet deleted successfully." });
         }
 
+        [HttpPost("check-availability")]
+        [AllowAnonymous]
+        public async Task<IActionResult> CheckAvailabilityAsync([FromBody] CheckBouquetAvailabilityRequest request)
+        {
+            var availability = await _bouquetService.CheckAvailabilityAsync(request.BouquetId, request.BouquetCount);
+            return Ok(availability);
+        }
+
         [HttpGet, Authorize]
         public async Task<IActionResult> GetBouquetsByUserIdAsync()
         {

@@ -142,6 +142,47 @@ namespace BLL.Services.Bouquets
             await _uow.CompleteAsync();
         }
 
+        public async Task<BLL.Services.Bouquets.Responses.BouquetAvailabilityResponse> CheckAvailabilityAsync(int bouquetId, int bouquetCount)
+        {
+            if (bouquetCount <= 0)
+            {
+                throw new ArgumentException("BouquetCount must be greater than zero.");
+            }
+
+            var bouquet = await _uow.BouquetRepository.GetBouquetWithFlowersAsync(bouquetId);
+            if (bouquet == null)
+            {
+                throw new KeyNotFoundException($"Bouquet with ID {bouquetId} was not found.");
+            }
+
+            var response = new BLL.Services.Bouquets.Responses.BouquetAvailabilityResponse
+            {
+                BouquetId = bouquetId,
+                BouquetCount = bouquetCount
+            };
+
+            foreach (var bouquetFlower in bouquet.BouquetsFlowers)
+            {
+                var flower = await _uow.FlowerRepository.FindAsync(bouquetFlower.FlowerId);
+                var availableFlowerCount = flower?.FlowerCount ?? 0;
+                var requiredFlowerCount = bouquetFlower.FlowerCount * bouquetCount;
+                var isAvailable = flower != null && availableFlowerCount >= requiredFlowerCount;
+
+                response.Flowers.Add(new BLL.Services.Bouquets.Responses.BouquetAvailabilityItemResponse
+                {
+                    FlowerId = bouquetFlower.FlowerId,
+                    FlowerName = flower?.FlowerName ?? bouquetFlower.Flower?.FlowerName,
+                    RequiredFlowerCount = requiredFlowerCount,
+                    AvailableFlowerCount = availableFlowerCount,
+                    IsAvailable = isAvailable
+                });
+            }
+
+            response.IsAvailable = response.Flowers.All(flower => flower.IsAvailable);
+
+            return response;
+        }
+
         public async Task<Bouquet> GetBouquetByIdAsync(int bouquetId)
         {
             return await _uow.BouquetRepository.GetBouquetByIdAsync(bouquetId);
