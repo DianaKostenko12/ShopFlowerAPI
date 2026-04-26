@@ -41,9 +41,9 @@ namespace FlowerShopApi.Controllers
         public async Task<IActionResult> AddCategory([FromBody] CreateCategoryRequest request)
         {
             var category = _mapper.Map<Category>(request);
-            await _categoryService.AddCategoryAsync(category);
+            var createdCategory = await _categoryService.AddCategoryAsync(category);
 
-            return Ok("Successfully created");
+            return Ok(_mapper.Map<CategoryResponse>(createdCategory));
         }
 
         [HttpDelete("{id}")]

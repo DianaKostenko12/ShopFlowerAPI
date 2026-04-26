@@ -6,7 +6,7 @@ namespace BLL.Services.Colors
     {
         Task<IEnumerable<Color>> GetColorsAsync();
         Task<Color> GetColorByIdAsync(int colorId);
-        Task AddColorAsync(Color color);
+        Task<Color> AddColorAsync(Color color);
         Task DeleteColorAsync(int colorId);
     }
 }

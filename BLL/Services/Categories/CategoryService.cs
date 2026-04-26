@@ -12,12 +12,14 @@ namespace BLL.Services.Categories
             _uow = uow;
         }
 
-        public async Task AddCategoryAsync(Category category)
+        public async Task<Category> AddCategoryAsync(Category category)
         {
             ArgumentNullException.ThrowIfNull(category);
 
             await _uow.CategoryRepository.AddAsync(category);
             await _uow.CompleteAsync();
+
+            return category;
         }
 
         public async Task DeleteCategoryAsync(int categoryId)

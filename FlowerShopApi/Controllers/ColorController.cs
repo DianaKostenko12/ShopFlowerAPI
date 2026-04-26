@@ -41,9 +41,9 @@ namespace FlowerShopApi.Controllers
         public async Task<IActionResult> AddColor([FromBody] CreateColorRequest request)
         {
             var color = _mapper.Map<Color>(request);
-            await _colorService.AddColorAsync(color);
+            var createdColor = await _colorService.AddColorAsync(color);
 
-            return Ok("Successfully created");
+            return Ok(_mapper.Map<ColorResponse>(createdColor));
         }
 
         [HttpDelete("{id}")]

@@ -12,12 +12,14 @@ namespace BLL.Services.Colors
             _uow = uow;
         }
 
-        public async Task AddColorAsync(Color color)
+        public async Task<Color> AddColorAsync(Color color)
         {
             ArgumentNullException.ThrowIfNull(color);
 
             await _uow.ColorRepository.AddAsync(color);
             await _uow.CompleteAsync();
+
+            return color;
         }
 
         public async Task DeleteColorAsync(int colorId)
