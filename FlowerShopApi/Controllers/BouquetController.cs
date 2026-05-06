@@ -129,6 +129,22 @@ namespace FlowerShopApi.Controllers
             return NotFound(new { Message = "Bouquet image was not found." });
         }
 
+        [HttpGet("{bouquetId}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetBouquetDetailsAsync(int bouquetId)
+        {
+            var bouquet = await _bouquetService.GetBouquetByIdAsync(bouquetId);
+            if (bouquet == null)
+            {
+                return NotFound(new { Message = $"Bouquet with ID {bouquetId} was not found." });
+            }
+
+            var bouquetDetails = _mapper.Map<BouquetDetailInfo>(bouquet);
+            bouquetDetails.Price = await _bouquetService.GetBouquetPriceAsync(bouquetId);
+
+            return Ok(bouquetDetails);
+        }
+
         [HttpPost("filter")]
         [AllowAnonymous]
         public async Task<IActionResult> GetBouquetsByFilterAsync([FromBody] BouquetFilterView view)

@@ -11,6 +11,7 @@ namespace BLL.Services.Bouquets
         Task<BouquetAvailabilityResponse> CheckAvailabilityAsync(int bouquetId, int bouquetCount);
         Task DeleteBouquetAsync(int bouquetId, int userId);
         Task<Bouquet> GetBouquetByIdAsync(int bouquetId);
+        Task<decimal> GetBouquetPriceAsync(int bouquetId);
         Task<List<Bouquet>> GetBouquetsByUserIdAsync(int userId);
         Task<List<Bouquet>> GetBouquetsByFilterAsync(BouquetFilterView view, int? userId);
         Task<bool> IsUserBouquetOwnerAsync(int bouquetId, int userId);

@@ -185,7 +185,12 @@ namespace BLL.Services.Bouquets
 
         public async Task<Bouquet> GetBouquetByIdAsync(int bouquetId)
         {
-            return await _uow.BouquetRepository.GetBouquetByIdAsync(bouquetId);
+            return await _uow.BouquetRepository.FindAsync(bouquetId);
+        }
+
+        public async Task<decimal> GetBouquetPriceAsync(int bouquetId)
+        {
+            return await _uow.BouquetRepository.GetBouquetPriceAsync(bouquetId);
         }
 
         public async Task<List<Bouquet>> GetBouquetsByUserIdAsync(int userId)
@@ -277,7 +282,7 @@ namespace BLL.Services.Bouquets
 
         public async Task<bool> IsUserBouquetOwnerAsync(int bouquetId, int userId)
         {
-            var bouquet = await _uow.BouquetRepository.GetBouquetByIdAsync(bouquetId);
+            var bouquet = await _uow.BouquetRepository.FindAsync(bouquetId);
 
             return bouquet != null && bouquet.User.Id == userId;
         }

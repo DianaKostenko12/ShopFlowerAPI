@@ -54,6 +54,9 @@ namespace FlowerShopApi.Mapper
             CreateMap<Bouquet, GetBouquetResponse>()
                 .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Price));
 
+            CreateMap<Bouquet, BouquetDetailInfo>()
+                .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Price));
+
             CreateMap<Order, OrderResponse>()
             .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Price))
             .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.User.FirstName))

@@ -72,9 +72,12 @@ namespace DAL.Repositories.Bouquets
             return await query.ToListAsync();
         }
 
-        public async Task<Bouquet> GetBouquetByIdAsync(int id)
+        public async Task<decimal> GetBouquetPriceAsync(int bouquetId)
         {
-           return await Sourse.Where(b => b.IsDeleted == false).FirstOrDefaultAsync(b => b.BouquetId == id);
+            return await Sourse
+                .Where(b => !b.IsDeleted && b.BouquetId == bouquetId)
+                .Select(b => b.BouquetsFlowers.Sum(bf => bf.Flower.FlowerCost * bf.FlowerCount))
+                .FirstOrDefaultAsync();
         }
 
         public async Task<Bouquet> GetBouquetWithFlowersAsync(int bouquetId)
