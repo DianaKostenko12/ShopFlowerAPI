@@ -7,8 +7,9 @@ namespace DAL.Repositories.Bouquets
     public interface IBouquetRepository : IBaseRepository<Bouquet>
     {
         Task<List<Bouquet>> GetBouquetsByUserIdAsync(int userId);
-        Task<List<Bouquet>> GetBouquetsByFilterAsync(BouquetFilterView view);
+        Task<List<BouquetFilterResult>> GetBouquetsByFilterAsync(BouquetFilterView view, int? userId);
         Task<decimal> GetBouquetPriceAsync(int bouquetId);
+        Task<Bouquet> GetBouquetWithUserAsync(int bouquetId);
         Task<Bouquet> GetBouquetWithFlowersAsync(int bouquetId);
     }
 }

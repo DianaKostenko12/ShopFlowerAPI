@@ -117,12 +117,13 @@ namespace BLL.Services.Bouquets
 
         public async Task DeleteBouquetAsync(int bouquetId, int userId)
         {
-            var bouquetToDelete = await _uow.BouquetRepository.FindAsync(bouquetId);
-            if (bouquetToDelete == null)
+            var bouquetAuthorInfo = await _uow.BouquetRepository.GetBouquetWithUserAsync(bouquetId);
+            if (bouquetAuthorInfo == null)
             {
                 throw new KeyNotFoundException($"Bouquet with ID {bouquetId} was not found.");
             }
-            User recordAuthor = await _userManager.FindByIdAsync(bouquetToDelete.User.Id.ToString());
+
+            User recordAuthor = await _userManager.FindByIdAsync(bouquetAuthorInfo.User.Id.ToString());
             IList<string> recordAuthorRoles = await _userManager.GetRolesAsync(recordAuthor);
 
             User editor = await _userManager.FindByIdAsync(userId.ToString());
@@ -136,6 +137,12 @@ namespace BLL.Services.Bouquets
             if (!recordAuthorRoles.Contains(Roles.Admin) && !editorRoles.Contains(Roles.Admin) && recordAuthor.Id != editor.Id)
             {
                 throw new BusinessException(HttpStatusCode.Forbidden, "Ви не маєте права");
+            }
+
+            var bouquetToDelete = await _uow.BouquetRepository.FindAsync(bouquetId);
+            if (bouquetToDelete == null)
+            {
+                throw new KeyNotFoundException($"Bouquet with ID {bouquetId} was not found.");
             }
 
             await _uow.BouquetRepository.RemoveAsync(bouquetToDelete);
@@ -203,47 +210,9 @@ namespace BLL.Services.Bouquets
             return bouquets;
         }
 
-        public async Task<List<Bouquet>> GetBouquetsByFilterAsync(BouquetFilterView view, int? userId)
+        public async Task<List<BouquetFilterResult>> GetBouquetsByFilterAsync(BouquetFilterView view, int? userId)
         {
-            List<Bouquet> bouquets = await _uow.BouquetRepository.GetBouquetsByFilterAsync(view);
-            List<Bouquet> filterBouquets = new List<Bouquet>();
-            foreach (var bouquet in bouquets)
-            {
-                User creator = await _userManager.FindByIdAsync(bouquet.User.Id.ToString());
-                IList<string> creatorRoles = await _userManager.GetRolesAsync(creator);
-                if (creatorRoles.Contains(Roles.Admin))
-                {
-                    filterBouquets.Add(bouquet);
-                }
-            }
-
-            if (userId.HasValue)
-            {
-                foreach (var bouquet in bouquets)
-                {
-                    if (await IsUserBouquetOwnerAsync(bouquet.BouquetId, userId.Value))
-                    {
-                        filterBouquets.Add(bouquet);
-                    }
-                }
-            }
-
-            var visibleBouquets = filterBouquets
-                .DistinctBy(x => x.BouquetId)
-                .ToList();
-
-            if (view?.ShapesList != null && view.ShapesList.Any())
-            {
-                var requestedShapes = view.ShapesList
-                    .Where(shape => !string.IsNullOrWhiteSpace(shape))
-                    .Select(shape => shape.Trim())
-                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-                visibleBouquets = visibleBouquets
-                    .Where(bouquet => !string.IsNullOrWhiteSpace(bouquet.Shape)
-                        && requestedShapes.Contains(bouquet.Shape.Trim()))
-                    .ToList();
-            }
+            List<BouquetFilterResult> visibleBouquets = await _uow.BouquetRepository.GetBouquetsByFilterAsync(view, userId);
 
             if (view?.ColorsList == null || !view.ColorsList.Any())
             {
@@ -266,9 +235,9 @@ namespace BLL.Services.Bouquets
             }
 
             return visibleBouquets
-                .Where(bouquet => bouquet.BouquetsFlowers.Any(bf =>
+                .Where(bouquet => bouquet.ColorNames.Any(color =>
                 {
-                    var colorName = bf.Flower?.Color?.ColorName?.Trim();
+                    var colorName = color?.Trim();
                     if (string.IsNullOrWhiteSpace(colorName))
                     {
                         return false;
@@ -282,7 +251,7 @@ namespace BLL.Services.Bouquets
 
         public async Task<bool> IsUserBouquetOwnerAsync(int bouquetId, int userId)
         {
-            var bouquet = await _uow.BouquetRepository.FindAsync(bouquetId);
+            var bouquet = await _uow.BouquetRepository.GetBouquetWithUserAsync(bouquetId);
 
             return bouquet != null && bouquet.User.Id == userId;
         }

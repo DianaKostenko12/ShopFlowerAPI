@@ -6,6 +6,7 @@ using DAL.Exceptions;
 using DAL.Models.Orders;
 using FlowerShopApi.Common.Extensions;
 using FlowerShopApi.DTOs.Orders;
+using FlowerShopApi.Services.OrderAssembly;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,12 +18,14 @@ namespace FlowerShopApi.Controllers
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IOrderService _orderService;
         private readonly IOrderBouquetService _orderBouquetService;
+        private readonly IOrderAssemblyScheduler _orderAssemblyScheduler;
         private readonly IMapper _mapper;
 
-        public OrderController(IOrderService orderService, IOrderBouquetService orderBouquetService,IHttpContextAccessor httpContextAccessor, IMapper mapper)
+        public OrderController(IOrderService orderService, IOrderBouquetService orderBouquetService, IOrderAssemblyScheduler orderAssemblyScheduler, IHttpContextAccessor httpContextAccessor, IMapper mapper)
         {
             _orderService = orderService;
             _orderBouquetService = orderBouquetService;
+            _orderAssemblyScheduler = orderAssemblyScheduler;
             _httpContextAccessor = httpContextAccessor;
             _mapper = mapper;
         }
@@ -70,7 +73,7 @@ namespace FlowerShopApi.Controllers
             {
                 int? userId = _httpContextAccessor.HttpContext.User.GetUserId();
                 int orderId = await _orderService.AddOrderAsync(descriptor, userId.Value);
-                await _orderService.AssembleOrderBouquetsAsync(orderId, descriptor.Bouquets);
+                _orderAssemblyScheduler.ScheduleAssembly(orderId, descriptor.Bouquets);
 
                 return CreatedAtAction(nameof(GetOrders), new { orderId }, descriptor);
             }

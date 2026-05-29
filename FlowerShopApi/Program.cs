@@ -30,6 +30,7 @@ using DAL.Repositories.Orders;
 using DAL.Repositories.WrappingPapers;
 using FlowerShopApi.Middlewares;
 using FlowerShopApi.Services.AIGeneratedBouquets;
+using FlowerShopApi.Services.OrderAssembly;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -114,6 +115,7 @@ builder.Services.AddScoped<IFlowerProcessingStep, BLL.Services.BouquetAssembly.F
 builder.Services.AddScoped<IBouquetWrappingStep, BouquetWrappingStep>();
 builder.Services.AddScoped<IBouquetAssembly, BLL.Services.BouquetAssembly.BouquetAssembly>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddSingleton<IOrderAssemblyScheduler, OrderAssemblyScheduler>();
 var uploadPath = Path.Combine(builder.Environment.ContentRootPath, "UploadedFiles");
 builder.Services.AddScoped<IFileStorage>(_ => new FileStorage(uploadPath));
 

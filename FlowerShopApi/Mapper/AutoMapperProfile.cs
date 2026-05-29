@@ -3,6 +3,7 @@ using BLL.Services.Auth.Descriptors;
 using BLL.Services.Bouquets;
 using BLL.Services.Bouquets.Descriptors;
 using BLL.Services.Flowers.Descriptors;
+using DAL.Filters;
 using DAL.Models;
 using DAL.Models.Flowers;
 using DAL.Models.Orders;
@@ -53,6 +54,8 @@ namespace FlowerShopApi.Mapper
 
             CreateMap<Bouquet, GetBouquetResponse>()
                 .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Price));
+
+            CreateMap<BouquetFilterResult, GetBouquetResponse>();
 
             CreateMap<Bouquet, BouquetDetailInfo>()
                 .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Price));

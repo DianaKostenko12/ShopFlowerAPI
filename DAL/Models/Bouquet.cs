@@ -11,6 +11,7 @@ namespace DAL.Models
         public int WrappingPaperId { get; set; }
         public string Shape {  get; set; }
         public bool IsDeleted { get; set; }
+        public int? UserId { get; set; }
         public User User { get; set; }
         public ICollection<BouquetFlower> BouquetsFlowers { get; set; }
         public ICollection<OrderBouquet> OrderBouquets { get; set; }
